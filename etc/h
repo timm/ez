@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# vim: ft=bash ts=2 sw=2 sts=2 et :
+hi() { 
+  clear
+  tput bold; tput setaf 11
+  cat<<-'EOF'
+        ___
+      _/ oo\
+     ( \  -/__
+      \    \__)    There is 
+      /     \      escape from
+jgs  /      _\     sH ELL !
+    `"""""``   
+
+EOF
+  tput bold; tput setaf 14
+  echo "Short cuts:"
+  alias | sed 's/alias /  /'
+  echo ""
+  tput sgr0
+}
+
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+here="$(cd $( dirname "${BASH_SOURCE[0]}" ) && pwd )"
+
+alias ..='cd ..'
+alias ...='cd ../../../'
+ 
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias gp="git add *;git commit -am save;git push;git status"
+alias grep='grep --color=auto'
+alias h="history"
+alias ls="ls -G "      
+
+export BASH_SILENCE_DEPRECATION_WARNING=1
+export PATH="$PWD:/opt/homebrew/bin:$PATH"
+export EDITOR=$(which pico)
+ 
+here() { cd $1; basename `pwd`; }
+PROMPT_COMMAND='echo -ne "☄️  $(git branch 2>/dev/null | grep '^*' | colrm 1 2):";PS1="$(here ..)/$(here .):\!\e[m ▶ "'
+
+bash -i
