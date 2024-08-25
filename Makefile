@@ -1,6 +1,6 @@
 SHELL     := bash
 MAKEFLAGS += --warn-undefined-variables
-.SILENT:
+#.SILENT:
 
 Top=$(shell git rev-parse --show-toplevel)
 Data ?= $(Top)/data/optimize
@@ -19,7 +19,7 @@ pull    : ## download
 push    : ## save
 	echo -en "Why this push? "; read x; git commit -am "$$x"; git push; git status
 
-$(Tmp)/%.pdf: %.py  ## make doco: .py ==> .pdf
+~/tmp/%.pdf: %.py  ## make doco: .py ==> .pdf
 	mkdir -p ~/tmp
 	echo "pdf-ing $@ ... "
 	a2ps                 \
