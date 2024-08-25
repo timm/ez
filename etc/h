@@ -1,0 +1,4 @@
+# vim: ft=bash ts=2 sw=2 sts=2 et :
+Top=`git rev-parse --show-toplevel`
+
+bash --init-file "$(Top)/etc/dotbashrc" -i
