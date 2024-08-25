@@ -1,14 +1,13 @@
 # vim: set ts=2 sw=2 sts=2 et:
 from lib import *
 from cols import COLS
-from data import DATA
 
 @dataclass
 class DATA:
   cols : COLS = None         # summaries of rows
   rows : rows = LIST() # rows
 
-  def activeLearning(self:DATA, score=lambda B,R: B-R, generate=None, faster=True ):
+  def activeLearning(self, score=lambda B,R: B-R, generate=None, faster=True ):
     "active learning"
     def ranked(rows): return self.clone(rows).chebyshevs().rows
   
@@ -44,7 +43,7 @@ class DATA:
       todo, done = self.branch(used = [])
     return loop(todo, done)
 
-  def add(self:DATA,row:row) -> DATA:
+  def add(self,row:row) -> Self:
     """As a side-effect on adding one row (to `rows`), update
     the column summaries (in `cols`)."""
     if    self.cols: self.rows += [self.cols.add(row)]
@@ -52,7 +51,7 @@ class DATA:
     return self
 
   # XXX:not sure on return types being two different types.
-  def branch(self:DATA, region:rows=None, stop=None, used=[], evals=1):
+  def branch(self, region:rows=None, stop=None, used=[], evals=1):
     "Recursively bi-cluster `region`, recurse only down the best half."
     region = region or self.rows
     if not stop: random.shuffle(region)
@@ -67,21 +66,21 @@ class DATA:
     else:
       return [r for r in self.rows if r not in used], used
 
-  def chebyshev(self:DATA,row:row) -> number:
+  def chebyshev(self,row:row) -> number:
     "Compute Chebyshev distance of one row to the best `y` values."
     return  max(abs(col.goal - col.norm(row[col.at])) for col in self.cols.y)
   
-  def chebyshevs(self:DATA) -> DATA:
+  def chebyshevs(self) -> Self:
     "Sort rows by Chebyshev distance."
     self.rows = sorted(self.rows, key=lambda r: self.chebyshev(r))
     return self
 
-  def clone(self:DATA, rows:rows=[]) -> DATA:
+  def clone(self, rows:rows=[]) -> Self:
     """Another way to create a DATA is to copy the columns structure of
     an existing DATA, then maybe load in some rows to that new DATA."""
     return DATA().add(self.cols.names).adds(rows)
 
-  def cluster(self:DATA, rows:rows=None,  sortp=False, stop=None, cut=None, fun=None, lvl=0):
+  def cluster(self, rows:rows=None,  sortp=False, stop=None, cut=None, fun=None, lvl=0):
     "recursive divide rows using distance to two far points"
     stop = stop or the.Stop
     rows = rows or self.rows
@@ -94,22 +93,22 @@ class DATA:
       it.rights = self.cluster(rs, sortp, stop, cut1, gt, lvl+1)
     return it
 
-  def d2h(self:DATA,row:row) -> number:
+  def d2h(self,row:row) -> number:
     "Compute euclidean distance of one row to the best `y` values."
     d = sum(abs(c.goal - c.norm(row[c.at]))**2 for c in self.cols.y)
     return (d/len(self.cols.y)) ** (1/the.p)
 
-  def d2hs(self:DATA) -> DATA:
+  def d2hs(self) -> Self:
     "Sort rows by the Euclidean distance of the goals to heaven."
     self.rows = sorted(self.rows, key=lambda r: self.d2h(r))
     return self
 
-  def dist(self:DATA, r1:row, r2:row) -> float:
+  def dist(self, r1:row, r2:row) -> float:
     "Euclidean distance between two rows."
     n = sum(c.dist(r1[c.at], r2[c.at])**the.p for c in self.cols.x)
     return (n / len(self.cols.x))**(1/the.p)
 
-  def diversity(self:DATA, rows:rows=None, stop=None):
+  def diversity(self, rows:rows=None, stop=None):
     "Diversity sampling (one per items)."
     rows = rows or self.rows
     cluster = self.cluster(rows, stop=stop or math.floor(len(rows)**0.5))
@@ -117,7 +116,7 @@ class DATA:
       if leafp:
           yield node.mid
   
-  def exploit(self:DATA, other:DATA, top=1000, used=None):
+  def exploit(self, other:Self, top=1000, used=None):
     "Guess a row more like `self` than `other`."
     out = ["?" for _ in self.cols.all]
     for _,col,x in sorted([coli.exploit(colj) 
@@ -130,11 +129,11 @@ class DATA:
           used[col.at].add(x)
     return out
 
-  def half(self:DATA, rows:rows, sortp=False) -> tuple[rows,rows,row,row,float]:
+  def half(self, rows:rows, sortp=False) -> tuple[rows,rows,row,row,float]:
     "Divide rows by distance to two faraway points"
     return self.half_median(rows,True) if the.median else self.half_mean(rows,True)
   
-  def half_mean(self:DATA, rows:rows, sortp=False) -> tuple[rows,rows,row,row,float]:
+  def half_mean(self, rows:rows, sortp=False) -> tuple[rows,rows,row,row,float]:
     "Divide rows by distance to two faraway points"
     left,right = self.twoFar(rows, sortp=sortp)
     C = self.dist(left,right)
@@ -144,7 +143,7 @@ class DATA:
       (lefts if project(row) <= C/2 else rights).append(row)
     return self.dist(left,lefts[-1]),lefts, rights, left, right
   
-  def half_median(self:DATA, rows:rows, sortp=False) -> tuple[rows,rows,row,row,float]:
+  def half_median(self, rows:rows, sortp=False) -> tuple[rows,rows,row,row,float]:
     "Divide rows by distance to two faraway points"
     mid = int(len(rows) // 2)
     left,right = self.twoFar(rows, sortp=sortp)
@@ -153,21 +152,21 @@ class DATA:
     tmp = sorted(self.rows, key=project)
     return self.dist(left,tmp[mid]), tmp[:mid], tmp[mid:], left, right
 
-  def loglike(self:DATA, r:row, nall:int, nh:int) -> float:
-   "How much DATA likes a `row`."
+  def loglike(self, r:row, nall:int, nh:int) -> float:
+    "How much DATA likes a `row`."
     prior = (len(self.rows) + the.k) / (nall + the.k*nh)
     likes = [c.like(r[c.at], prior) for c in self.cols.x if r[c.at] != "?"]
     return sum(log(x) for x in likes + [prior] if x>0)
 
-  def mid(self:DATA) -> row:
+  def mid(self) -> row:
     "Return central tendency of a DATA."
     return [col.mid() for col in self.cols.all]
  
-  def neighbors(self:DATA, row1:row, rows:rows=None) -> rows:
+  def neighbors(self, row1:row, rows:rows=None) -> rows:
     "Sort `rows` by their distance to `row1`'s x values."
     return sorted(rows or self.rows, key=lambda row2: self.dist(row1, row2))  
 
-  def predict(self:DATA, row1:row, rows:rows, cols=None, k=2):
+  def predict(self, row1:row, rows:rows, cols=None, k=2):
     "Return predictions for `cols` (defaults to klass column)."
     cols = cols or self.cols.y
     got = {col.at : [] for col in cols}
@@ -176,13 +175,13 @@ class DATA:
       [got[col.at].append( (d, row2[col.at]) )  for col in cols]
     return {col.at : col.predict( got[col.at] ) for col in cols}
    
-  def shuffle(self:DATA) -> DATA:
+  def shuffle(self) -> Self:
     "Sort rows randomly"
     random.shuffle(self.rows)
     return self
 
-  def twoFar(self:DATA, rows:rows, sortp=False, samples:int=None) -> tuple[row,row] :
-   "Return two distant rows, optionally sorted into best, then rest"
+  def twoFar(self, rows:rows, sortp=False, samples:int=None) -> tuple[row,row] :
+    "Return two distant rows, optionally sorted into best, then rest"
     left, right =  max(((one(rows), one(rows)) for _ in range(samples or the.fars)),
                          key= lambda two: self.dist(*two))
     if sortp and self.chebyshev(right) < self.chebyshev(left): right,left = left,right
@@ -197,19 +196,19 @@ class CLUSTER:
   cut    : number
   fun    : Callable
   lvl    : int = 0
-  lefts  : CLUSTER = None
-  rights : CLUSTER = None
+  lefts  : Self = None
+  rights : Self = None
 
-  def __repr__(self:CLUSTER) -> str:
+  def __repr__(self) -> str:
     return f"{'|.. ' * self.lvl}{len(self.data.rows)}"
 
-  def leaf(self:CLUSTER, data:DATA, row:row) -> CLUSTER:
+  def leaf(self, data:DATA, row:row) -> Self:
     d = data.dist(self.left,row)
     if self.lefts  and self.lefts.fun( d,self.lefts.cut):  return self.lefts.leaf(data,row)
     if self.rights and self.rights.fun(d,self.rights.cut): return self.rights.leaf(data,row)
     return self
 
-  def nodes(self:CLUSTER):
+  def nodes(self):
     def leafp(x): return x.lefts==None or x.rights==None
     yield self, leafp(self)
     for node in [self.lefts,self.rights]:

@@ -1,4 +1,5 @@
 from lib import *
+from col import COL
 from num import NUM
 from sym import SYM
 
@@ -12,7 +13,7 @@ class COLS:
   y    : list[COL] = LIST()  # dependent COLumns
   klass: COL = None
 
-  def __post_init__(self:COLS) -> None:
+  def __post_init__(self) -> None:
     """Collect  `all` the COLs as well as the dependent/independent 
     `x`,`y` lists. Upper case names are NUMerics. Anything ending in 
     `+` or `-` is a goal to  be maximized of minimized. Anything 
@@ -26,7 +27,7 @@ class COLS:
         if z=="!": self.klass = col
         if z=="-": col.goal = 0
 
-def add(self:COLS, row:row) -> row:
+def add(self, row:row) -> row:
   "add all the `x` and `y` cols."
   [col.add(row[col.at]) for cols in [self.x, self.y] for col in cols]
   return row

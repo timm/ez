@@ -9,12 +9,12 @@ class COL:
   at  : int = 0
   txt : str = ""
 
-  def add(self:COL, x:any) -> any:
+  def add(self, x:any) -> any:
     "If `x` is known, add this COL."
     if x != "?":
       self.n += 1
       self.add1(x)
 
-  def dist(self:COL, x:any, y:any) -> float:
+  def dist(self, x:any, y:any) -> float:
     "Between two values (Aha's algorithm)."
     return 1 if x==y=="?" else self.dist1(x,y)

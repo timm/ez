@@ -3,7 +3,7 @@ from fileinput import FileInput as file_or_stdin
 import re,sys,ast,math,random,inspect
 from math import exp,log,cos,sqrt,pi
 import re,sys,ast,math,random
-from types import *
+from mytypes import *
 
 R   = random.random
 one = random.choice
