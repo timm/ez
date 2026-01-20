@@ -1,7 +1,7 @@
 <img align=left width=150 src="etc/img/brain.png"> 
-      
+          
 [&copy; 2026](/LICENSE.md) by [timm](http://timm.fyi)    
-       
+          
 [![Lua 5.4](https://img.shields.io/badge/Python-3.14-blue?labelColor=1D4ED8&color=0A2A7A)](https://github.com/timm/six/blob/main/README.md)
 [![Purpose XAI](https://img.shields.io/badge/Purpose-XAI-orange?labelColor=FB8C00&color=A85A00)](https://github.com/timm/six/blob/main/README.md)
 [![Goal Multi-Obj](https://img.shields.io/badge/Goal-Multi--Obj-purple?labelColor=C026D3&color=6D1780)](https://github.com/timm/six/blob/main/README.md)
