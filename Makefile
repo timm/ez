@@ -1,61 +1,82 @@
-SHELL     := bash
-MAKEFLAGS += --warn-undefined-variables
-#.SILENT:
+SHELL := /bin/bash
+GIT_ROOT := $(shell git rev-parse --show-toplevel 2>/dev/null)
 
-Top=$(shell git rev-parse --show-toplevel)
-Data ?= $(Top)/data/optimize
-Tmp  ?= $(HOME)/tmp
-Act  ?= _mqs
+help: ## show help.
+	@gawk -f $(GIT_ROOT)/sh/makehelp.awk $(MAKEFILE_LIST)
 
-help: ## print help
-	printf "\nmake [OPTIONS]\n\nOPTIONS:\n"
-	grep -E '^[a-zA-Z_\.-]+:.*?## .*$$' $(MAKEFILE_LIST) \
-	| sort \
-	| awk 'BEGIN {FS = ":.*?## "} {printf "  \033[36m%-10s\033[0m %s\n", $$1, $$2}'
+ok: ~/gits/moot ## set up baseline
+	@chmod +x *.py
 
-pull    : ## download
-	git pull
+push: ## save to cloud
+	@read -p "Reason? " msg; git commit -am "$$msg"; git push; git status
 
-push    : ## save
-	echo -en "Why this push? "; read x; git commit -am "$$x"; git push; git status
+clean: ## remove pycadhe
+	rm -rf __pycache__
 
-~/tmp/%.pdf: %.py  ## make doco: .py ==> .pdf
-	mkdir -p ~/tmp
-	echo "pdf-ing $@ ... "
-	a2ps                 \
-		-Br                 \
-		--chars-per-line=90 \
-		--file-align=fill      \
-		--line-numbers=1        \
-		--pro=color               \
-		--left-title=""            \
-		--borders=no             \
-	    --left-footer="$<  "               \
-	    --right-footer="page %s. of %s#"               \
-		--columns 3                 \
-		-M letter                     \
-	  -o	 $@.ps $<
-	ps2pdf $@.ps $@; rm $@.ps
-	open $@
+ghReset:  
+	git remote set-url origin https://timmenzies@github.com/timmenzies/xai.git
 
-$(Tmp)/%.html : %.py etc/py2html.awk etc/b4.html docs/ezr.css Makefile ## make doco: md -> html
-	echo "$< ... "
-	gawk -f etc/py2html.awk $< \
-	| pandoc -s  -f markdown --number-sections --toc --toc-depth=5 \
-					-B etc/b4.html --mathjax \
-  		     --css ezr.css --highlight-style tango \
-					 --metadata title="$<" \
-	  			 -o $@ 
+lint: $f.py  ## Lint python file x.py using `make lint f=x`    
+	# disable naming, docstring, and formatting rules
+	@pylint --disable=C0103,C0104,C0105,C0115,C0116,C0321,C0410 \
+		      --disable=E0213 \
+					--disable=R1735 \
+					--disable=W0106,W0201,W0311 $f.py
 
-# another commaned
-Out=$(HOME)/tmp
-acts: ## experiment: mqs
-	mkdir -p ~/tmp
-	$(MAKE)  actb4  > $(Tmp)/acts.sh
-	bash $(Tmp)/acts.sh
+#------------------------
+# xai speicif stuff
+Data=~/gits/moot/optimize/misc/auto93.csv
 
-actb4: ## experiment: mqs
-	mkdir -p $(Out)/$(Act)
-	$(foreach d, config hpo misc process,         \
-		$(foreach f, $(wildcard $(Data)/$d/*.csv),   \
-				echo "python3 $(PWD)/ezr.py -D -t $f -e $(Act)  | tee $(Out)/$(Act)/$(shell basename $f) & "; ))
+SA    : ok $(Data); ./sa.py 1 $(Data) ## simulated annelling
+KMEANS: ok $(Data); ./kmeans.py 1 $(Data) ## K-Means
+KDTREE: ok $(Data); ./kdtree.py 1 $(Data) ## KD-Tree
+
+YS: ## show y shorting
+	@./ez.py --ys ~/gits/moot/optimize/misc/auto93.csv  | column -t
+
+TREE: ## show y shorting
+	@./ez.py --tree ~/gits/moot/optimize/misc/auto93.csv  
+
+~/gits/moot:  ## get the data
+	mkdir -p ~/gits
+	git clone http://tiny.cc/moot $@
+
+#--------------------------
+MY=@bash sh/ell
+
+.PHONY: sh
+.IGNORE: sh
+sh: ## demo of my shell
+	@-bash --init-file $(GIT_ROOT)/sh/ell -i
+
+mytree: ## demo of my tree
+	$(MY) tree
+
+ls: ## demo of my ls
+	$(MY) ls
+
+tmux: ## demo of my tmux
+	$(MY) tmux
+
+grep: ## demo of my grep
+	$(MY) grep es Makefile
+
+col: ## demo of my col
+	printf "name,age,city\nalice,30,raleigh\nbob,25,boston\ncarol,40,denver\n" \
+		| bash $(GIT_ROOT)/sh/ell col
+
+~/tmp/%.pdf: %.py  ## .py ==> .pdf
+	@mkdir -p ~/tmp
+	@echo "pdf-ing $@ ... "
+	@a2ps               \
+		-Br               \
+		--quiet            \
+		--portrait          \
+		--chars-per-line=85  \
+		--line-numbers=1      \
+		--borders=no           \
+		--pro=color             \
+		--columns=2              \
+		-M letter                 \
+		-o - $< | ps2pdf - $@
+	@open $@

@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XAI Framework Documentation</title>
+<style>
+    /* VARIABLES & THEME */
+    :root {
+        --bg: #f8fafc;        /* slate-50 */
+        --card-bg: #ffffff;
+        --text-main: #334155; /* slate-700 */
+        --text-head: #0f172a; /* slate-900 */
+        --text-muted: #64748b;/* slate-500 */
+        --primary: #4f46e5;   /* indigo-600 */
+        --primary-hover: #4338ca;
+        --primary-light: #e0e7ff; /* indigo-100 */
+        --border: #e2e8f0;    /* slate-200 */
+        --code-bg: #1e293b;   /* slate-800 */
+        --code-text: #f1f5f9;
+        --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    }
+
+    [data-theme="dark"] {
+        --bg: #0f172a;
+        --card-bg: #1e293b;
+        --text-main: #cbd5e1;
+        --text-head: #f1f5f9;
+        --text-muted: #94a3b8;
+        --primary: #818cf8;
+        --primary-hover: #6366f1;
+        --primary-light: #312e81;
+        --border: #334155;
+        --code-bg: #020617;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+    }
+
+    /* BASE STYLES */
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: var(--bg);
+        color: var(--text-main);
+        margin: 0;
+        line-height: 1.6;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    a { color: var(--primary); text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--primary-hover); text-decoration: underline; }
+
+    /* LAYOUT */
+    header {
+        background: var(--card-bg);
+        border-bottom: 1px solid var(--border);
+        height: 64px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        padding: 0 1.5rem;
+        gap: 1.5rem;
+        z-index: 10;
+    }
+
+    .brand {
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--text-head);
+        white-space: nowrap;
+        margin-right: auto;
+    }
+    .brand span { color: var(--primary); }
+
+    /* NAVIGATION */
+    nav {
+        display: flex;
+        gap: 0.5rem;
+        height: 100%;
+        overflow-x: auto;
+    }
+    
+    nav button {
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 0 1rem;
+        height: 100%;
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+    }
+
+    nav button:hover { color: var(--primary); }
+    nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+    /* UTILITIES */
+    .controls { display: flex; gap: 0.75rem; align-items: center; }
+    
+    .search-box {
+        position: relative;
+    }
+    .search-box input {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        color: var(--text-main);
+        width: 160px;
+        transition: width 0.2s;
+    }
+    .search-box input:focus { outline: 2px solid var(--primary-light); width: 220px; }
+
+    .theme-toggle {
+        background: none; border: none; font-size: 1.2rem; cursor: pointer; padding: 0.25rem;
+        border-radius: 4px; color: var(--text-muted);
+    }
+    .theme-toggle:hover { background: var(--bg); color: var(--text-head); }
+
+    /* MAIN CONTENT */
+    main {
+        flex: 1;
+        overflow-y: auto;
+        padding: 2rem 1rem;
+        scroll-behavior: smooth;
+    }
+
+    .container {
+        max-width: 960px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    /* SECTIONS & TABS */
+    section { display: none; animation: fade 0.25s ease-out; }
+    section.active { display: block; }
+    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    h1 { font-size: 2rem; color: var(--text-head); margin: 0 0 1rem 0; letter-spacing: -0.025em; }
+    h2 { font-size: 1.5rem; color: var(--text-head); margin: 2rem 0 1rem 0; letter-spacing: -0.025em; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    h3 { font-size: 1.15rem; color: var(--text-head); margin: 1.5rem 0 0.75rem 0; font-weight: 600; display: flex; align-items: center; gap: 0.5rem; }
+    p { margin-bottom: 1rem; max-width: 70ch; }
+    
+    /* TABLES */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.95rem; }
+    th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-head); font-weight: 600; background-color: var(--bg); }
+    tr:hover td { background-color: var(--bg); }
+
+    /* CARDS */
+    .card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 0.75rem;
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        margin-bottom: 1.5rem;
+    }
+    
+    .card.highlight { border: 1px solid var(--primary); }
+
+    /* CODE BLOCKS */
+    pre {
+        background: var(--code-bg);
+        color: var(--code-text);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        overflow-x: auto;
+        font-family: "JetBrains Mono", Consolas, monospace;
+        font-size: 0.85rem;
+        position: relative;
+        margin: 1rem 0;
+    }
+
+    code {
+        font-family: "JetBrains Mono", Consolas, monospace;
+        font-size: 0.85em;
+        background: var(--primary-light);
+        color: var(--primary);
+        padding: 0.15em 0.3em;
+        border-radius: 4px;
+    }
+    
+    pre code { background: none; color: inherit; padding: 0; }
+
+    .copy-btn {
+        position: absolute;
+        top: 0.5rem; right: 0.5rem;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        color: var(--code-text);
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    pre:hover .copy-btn { opacity: 1; }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); }
+
+    /* LISTS & TABLES */
+    ul { padding-left: 1.5rem; margin-bottom: 1rem; }
+    li { margin-bottom: 0.5rem; }
+
+    .api-list { list-style: none; padding: 0; }
+    .api-item {
+        border-bottom: 1px solid var(--border);
+        padding: 1rem 0;
+    }
+    .api-item:last-child { border-bottom: none; }
+    
+    .signature {
+        font-family: "JetBrains Mono", monospace;
+        color: var(--primary);
+        font-weight: 600;
+        display: block;
+        margin-bottom: 0.5rem;
+        word-break: break-all;
+    }
+    
+    .desc { color: var(--text-main); font-size: 0.95rem; }
+    .type-def {
+        font-size: 0.8rem;
+        background: var(--bg);
+        padding: 0.5rem;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+        margin-bottom: 1rem;
+        font-family: "JetBrains Mono", monospace;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+        header { flex-direction: column; height: auto; padding: 1rem; align-items: stretch; }
+        .controls { justify-content: space-between; margin-top: 1rem; }
+        nav { margin-top: 1rem; padding-bottom: 0.5rem; }
+        .search-box input { width: 100%; }
+        .search-box input:focus { width: 100%; }
+    }
+</style>
+</head>
+<body data-theme="light">
+
+<header>
+    <div class="brand">XAI <span>Framework</span></div>
+    <nav>
+        <button onclick="switchTab('overview')" class="active" id="btn-overview">Overview</button>
+        <button onclick="switchTab('tutorials')" id="btn-tutorials">Tutorials</button>
+        <button onclick="switchTab('how-to')" id="btn-how-to">How-To</button>
+        <button onclick="switchTab('reference')" id="btn-reference">Reference</button>
+        <button onclick="switchTab('explanation')" id="btn-explanation">Explanation</button>
+        <button onclick="switchTab('faq')" id="btn-faq">FAQ</button>
+        <button onclick="switchTab('about')" id="btn-about">About</button>
+    </nav>
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search docs..." onkeyup="filterContent()">
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle Theme">🌗</button>
+    </div>
+</header>
+
+<main>
+    <div class="container">
+
+        <section id="overview" class="active">
+            <h1>Explainable Multi-Objective Optimization</h1>
+            <p class="lead">A lightweight, standalone Python 3 framework for data analysis that prioritizes interpretability using Tree Learning.</p>
+            
+            <div class="card">
+                <h3>🔍 What is this?</h3>
+                <p><strong>XAI</strong> is a script that analyzes datasets to build <strong>Decision Trees</strong> that optimize multiple objectives simultaneously. Instead of a "black box" prediction, it outputs a hierarchical tree of rules (cuts) that lead to "heavenly" (optimized) outcomes.</p>
+                <p>It includes tools for:</p>
+                <ul>
+                    <li><strong>Statistical Analysis:</strong> Calculating means, standard deviations, and distributions (Symbolic and Numeric).</li>
+                    <li><strong>Discretization:</strong> Converting continuous values into distinct bins (Cuts) to find the best split points.</li>
+                    <li><strong>Tree Learning:</strong> Recursively splitting data into "kids" to isolate the best performing rows.</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>The Philosophy: "Backpacking" Code</h3>
+                <p>
+                    Most modern AI tools suffer from "Complexity Theater"—bloated frameworks, heavy dependencies, and opaque logic. 
+                    <strong>XAI.py</strong> is built on the philosophy of "Backpacking":
+                </p>
+                <ul>
+                    <li><strong>Zero Dependencies:</strong> Runs on standard Python 3. No numpy, no pandas, no torch.</li>
+                    <li><strong>Self-Contained:</strong> The entire logic fits in a single file (~200 lines).</li>
+                    <li><strong>Auditable:</strong> You can read, understand, and trust every line of code.</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="tutorials">
+            <h1>Getting Started</h1>
+            <p>Follow this guide to set up the environment and run your first tree analysis.</p>
+
+            <article class="card">
+                <h3>1. Installation</h3>
+                <p>XAI is a single-file Python script. It requires <strong>Python 3</strong>. No external libraries are needed.</p>
+                <pre><code>chmod +x xai.py
+./xai.py -h</code></pre>
+            </article>
+
+            <article class="card">
+                <h3>2. Preparing Data</h3>
+                <p>Create a CSV file (e.g., <code>data.csv</code>). The first row must define column names. Use casing and suffixes to define column roles:</p>
+                <ul>
+                    <li><code>name</code>: <strong>Lowercase</strong> starts indicate Symbolic/Categorical columns.</li>
+                    <li><code>Age</code>: <strong>Uppercase</strong> starts indicate Numeric columns.</li>
+                    <li><code>Salary+</code>: Numeric goal to <strong>maximize</strong> (+).</li>
+                    <li><code>Error-</code>: Numeric goal to <strong>minimize</strong> (-).</li>
+                    <li><code>RegionX</code>: Suffix X indicates column to <strong>ignore</strong>.</li>
+                </ul>
+                <pre><code>name,    Age,  Salary+,  Error-
+alice,   25,   50000,    0.1
+bob,     35,   60000,    0.05
+charlie, 45,   80000,    0.2</code></pre>
+            </article>
+
+            <article class="card">
+                <h3>3. Tutorial: The Flight Project (Xomo)</h3>
+                <p>This case study demonstrates how XAI reduces 24 complex variables down to 4 actionable rules.</p>
+                <p><strong>The Data:</strong></p>
+                <pre><code>DATA, AAX, ... (20 cols) ..., TIME, TOOL, EFFORT-, MONTHS-, DEFECTS-, RISKS-
+2.8,  3.8, ...               , 3.0,  2.0,  1681,    35,      9129,     0.0
+2.0,  3.7, ...               , 3.8,  2.0,  2677,    39,      16726,    0.2
+... (hundreds of rows) ...</code></pre>
+
+                <p><strong>Running the Analysis:</strong></p>
+                <p>Use the <code>--tree</code> flag to generate an explanation tree.</p>
+                <pre><code>./xai.py --tree xomo_flight.csv</code></pre>
+                
+                <p><strong>Interpreting Output:</strong></p>
+                <pre><code> 
+                                     score     N    EFFORT-, MONTHS-, DEFECTS-, RISKS-
+                                     -----    ---   ----------------------------------
+.                                  :   0.38:  398 : 13.0, 81.0, 0.38, 1.2
+| RELY >= 1.2                      :   0.36:  162 : 16.0, 78.0, 0.36, 1.0
+| | PVOL < 3.4                     :   0.33:   61 : 17.0, 72.0, 0.33, 0.8
+| | | AEXP >= 2.2                  :   0.28:   31 : 17.0, 70.0, 0.28, 0.4
+| | | | RISKS- < 2.1               :   0.15:   12 : 5.0, 20.0, 0.1, 0.0</code></pre>
+                <p>
+                    Out of 24 variables, the algorithm identified that only <strong>4 matter</strong> for achieving the best results (lowest score):
+                    High reliability, stable platform (Low PVOL), experienced staff (High AEXP), and low initial risks.
+                </p>
+            </article>
+        </section>
+
+        <section id="how-to">
+            <h1>Common Tasks</h1>
+
+            <div class="card">
+                <h3>How to ensure reproducible results</h3>
+                <p>The framework uses <code>random</code> for shuffling and Gaussian generation. Set the seed using <code>-s</code>.</p>
+                <pre><code>./xai.py -s 12345 --tree data.csv</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>How to control Tree Growth</h3>
+                <p>You can control the depth and detail of the tree using the leaf size configuration. The tree stops growing when a node has fewer than <code>2 * leaf</code> rows.</p>
+                <pre><code>./xai.py -l 10 --tree data.csv</code></pre>
+            </div>
+            
+            <div class="card">
+                <h3>How to configure Discretization</h3>
+                <p>When finding cuts for numeric columns, the script divides data into bins. Adjust the number of bins with <code>-b</code>.</p>
+                <pre><code>./xai.py -b 10 --tree data.csv</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>How to debug CSV loading</h3>
+                <p>If your analysis fails, use the <code>--data</code> or <code>--csv</code> commands to verify the file is parsing correctly.</p>
+                <pre><code>./xai.py --csv data.csv   # Prints raw rows
+./xai.py --data data.csv  # Prints column statistics</code></pre>
+            </div>
+        </section>
+
+        <section id="reference">
+            <h1>Reference</h1>
+            
+            <h2>CLI Commands</h2>
+            <div class="card">
+                <p>Arguments are parsed via reflection on the global `the` object and functions starting with <code>go__</code>.</p>
+                <table style="width:100%; text-align:left; border-collapse: collapse;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border);">
+                            <th style="padding: 0.5rem;">Flag</th>
+                            <th style="padding: 0.5rem;">Arguments</th>
+                            <th style="padding: 0.5rem;">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>-h</code></td><td>None</td><td>Show help.</td></tr>
+                        <tr><td><code>-b</code></td><td>INT</td><td>Set number of bins for discretization (default 7).</td></tr>
+                        <tr><td><code>-B</code></td><td>INT</td><td>Set Budget: number of rows to evaluate (default 30).</td></tr>
+                        <tr><td><code>-C</code></td><td>INT</td><td>Set Check: number of guesses to check (default 5).</td></tr>
+                        <tr><td><code>-d</code></td><td>FILE</td><td>Set data file to load (default "data.csv").</td></tr>
+                        <tr><td><code>-l</code></td><td>INT</td><td>Set leaf size: min examples per leaf (default 2).</td></tr>
+                        <tr><td><code>-s</code></td><td>INT</td><td>Set random number seed (default 1).</td></tr>
+                        <tr><td><code>--all</code></td><td>FILE</td><td>Run all tests.</td></tr>
+                        <tr><td><code>--num</code></td><td>None</td><td>Test Num class.</td></tr>
+                        <tr><td><code>--sym</code></td><td>None</td><td>Test Sym class.</td></tr>
+                        <tr><td><code>--csv</code></td><td>FILE</td><td>Test CSV loading.</td></tr>
+                        <tr><td><code>--data</code></td><td>FILE</td><td>Test adding columns from file.</td></tr>
+                        <tr><td><code>--clone</code></td><td>FILE</td><td>Test echoing structure of a table.</td></tr>
+                        <tr><td><code>--distx</code></td><td>FILE</td><td>Sort rows by distance to one row (independent vars).</td></tr>
+                        <tr><td><code>--disty</code></td><td>FILE</td><td>Sort rows by distance to heaven (dependent vars).</td></tr>
+                        <tr><td><code>--bins</code></td><td>FILE</td><td>Show the rankings of bins.</td></tr>
+                        <tr><td><code>--tree</code></td><td>FILE</td><td>Run the optimizer once, show the tree.</td></tr>
+                        <tr><td><code>--xais</code></td><td>FILE</td><td>Run the optimizer 20 times, show stats (calls internal `go__xais`).</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>API Documentation</h2>
+            <div class="card">
+                <p>The code uses <code>types.SimpleNamespace</code> (aliased as <code>obj</code>) for objects.</p>
+                
+                <h3>Constructors</h3>
+                <ul class="api-list">
+                    <li class="api-item">
+                        <span class="signature">def Sym()</span>
+                        <span class="desc">Constructs a Symbolic tracker. Attributes: <code>n</code>, <code>has</code>.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def Num()</span>
+                        <span class="desc">Constructs a Numeric tracker. Attributes: <code>n</code>, <code>mu</code>, <code>m2</code>.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def Col(at=0, txt=" ")</span>
+                        <span class="desc">Factory. Returns Num if <code>txt</code> starts upper-case, else Sym. Sets <code>best</code> (0 for minimize, 1 for maximize).</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def Cols(names)</span>
+                        <span class="desc">Container for columns. <code>x</code> (independent), <code>y</code> (dependent goals).</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def Data(rows=None)</span>
+                        <span class="desc">Main data container. Stores <code>rows</code>, <code>cols</code>, <code>_centroid</code>.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def Cut(at, txt, lo, hi)</span>
+                        <span class="desc">Represents a range/bin. Attributes: <code>xlo</code>, <code>xhi</code>, <code>y</code> (Num score).</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def Tree(n, mu, mids, cut, goals)</span>
+                        <span class="desc">Node in the decision tree. Attributes: <code>kids</code> (dict), <code>cut</code> (rule), <code>goals</code> (list of goal names).</span>
+                    </li>
+                </ul>
+
+                <h3 style="margin-top: 2rem;">Stats & Calculation</h3>
+                <ul class="api-list">
+                    <li class="api-item">
+                        <span class="signature">def adds(src, i=None)</span>
+                        <span class="desc">Batch update. Adds items from <code>src</code> into <code>i</code>.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def add(i, v, inc=1)</span>
+                        <span class="desc">Updates stats in <code>i</code> with value <code>v</code>. Recurses for Data/Cols.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def norm(num, n)</span>
+                        <span class="desc">Normalizes <code>n</code> using a Sigmoid function based on <code>num.mu</code> and <code>num.m2</code>.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def sd(num)</span>
+                        <span class="desc">Calculates standard deviation from <code>num.m2</code>.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def mid(col)</span>
+                        <span class="desc">Returns central tendency (mu for Num, mode for Sym).</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def mids(data)</span>
+                        <span class="desc">Returns list of midpoints for all columns in data.</span>
+                    </li>
+                </ul>
+
+                <h3 style="margin-top: 2rem;">Distances & Trees</h3>
+                <ul class="api-list">
+                    <li class="api-item">
+                        <span class="signature">def disty(data, row)</span>
+                        <span class="desc">Euclidean distance of a row's dependent variables (<code>data.cols.y</code>) to best possible values.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def distx(data, row1, row2)</span>
+                        <span class="desc">AHA distance between independent variables (<code>data.cols.x</code>).</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def cutBest(data, rows)</span>
+                        <span class="desc">Finds the best single <code>Cut</code> that separates the rows to maximize goal scores.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def cutsAll(col, rows, data)</span>
+                        <span class="desc">Discretizes a specific column into bins based on <code>disty</code> scores.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def treeGrow(data, rows=None, cut=None, uses=set())</span>
+                        <span class="desc">Recursively builds a <code>Tree</code>. Stops if data size < <code>the.leaf * 2</code>. Populates <code>uses</code> set.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def treeShow(tree, lvl=0, accept=True, width=60, dec=1)</span>
+                        <span class="desc">Prints the tree structure to stdout with scores and population stats.</span>
+                    </li>
+                    <li class="api-item">
+                        <span class="signature">def treeLeaf(tree, row)</span>
+                        <span class="desc">Navigates the tree to find the leaf node corresponding to <code>row</code>.</span>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="explanation">
+            <h1>Concepts & Architecture</h1>
+
+            <div class="card">
+                <h3>Comparison: XAI vs LIME/SHAP</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>LIME / SHAP</th>
+                            <th>XAI.py</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Output</strong></td>
+                            <td>Feature Importance Weights (e.g., "Age is 0.8 important")</td>
+                            <td>Actionable Ranges (e.g., "Age > 40")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Scope</strong></td>
+                            <td>Local (per instance) or Global</td>
+                            <td>Global Rules for "Best" vs "Rest"</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Actionability</strong></td>
+                            <td>Low (tells you <em>what</em> matters, not <em>how</em> to change it)</td>
+                            <td>High (tells you exactly what boundaries to target)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>Causal Audit: Questions vs. Answers</h3>
+                <p>How XAI answers the fundamental questions of causal auditing:</p>
+                <table>
+                    <tr>
+                        <th>User Question</th>
+                        <th>Tree Answer</th>
+                    </tr>
+                    <tr>
+                        <td>What can I do?</td>
+                        <td>The branches (rules) of the tree.</td>
+                    </tr>
+                    <tr>
+                        <td>What happens if I do that?</td>
+                        <td>The leaf statistics (mean/median of goals).</td>
+                    </tr>
+                    <tr>
+                        <td>How sure are you?</td>
+                        <td>The variance/spread in the leaf cluster.</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h3>Sigmoid Normalization</h3>
+                <p>Standard min-max normalization is sensitive to outliers. XAI uses a Sigmoid transformation to map values to 0..1 based on distribution.</p>
+                <pre><code>z = (n - num.mu) / sd(num)
+z = max(-3, min(3, z))
+val = 1 / (1 + exp(-1.7 * z))</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>Tree Learning (Recursive Partitioning)</h3>
+                <p>The core logic is in <code>treeGrow</code>. The algorithm:</p>
+                <ol>
+                    <li>Calculates the global score (distance to heaven) for the current set of rows.</li>
+                    <li>Iterates through all independent columns (<code>x</code>) to find possible "Cuts" (splits).</li>
+                    <li>Evaluates every cut using <code>cutScore</code>, which favors splits that create subgroups with better (lower) distance scores and low variance.</li>
+                    <li>Selects the best Cut and splits data into <code>True</code> (pass) and <code>False</code> (fail) branches.</li>
+                    <li>Recurses until the number of rows is too small (<code>the.leaf</code>).</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3>Discretization Score</h3>
+                <p>To evaluate if a split is "good", the system uses a heuristic score. For a given bin (subset of rows):</p>
+                <p>Score = &#956; + &#963; / (&radic;n + &epsilon;)</p>
+                <p>Where &#956; is the mean distance to heaven, &#963; is the standard deviation, and n is the number of rows. This penalizes small sample sizes and high variance.</p>
+            </div>
+        </section>
+
+        <section id="faq">
+            <h1>FAQ & Design Decisions</h1>
+
+            <div class="card">
+                <h3>Why these default values?</h3>
+                <p><strong><code>bins = 7</code></strong></p>
+                <p>Based on <em>Miller's Law</em> (The Magical Number Seven, Plus or Minus Two). Humans can only hold about 7 items in working memory. Discretizing continuous data into more bins creates distinctions too fine for human cognitive processing.</p>
+
+                <p><strong><code>Budget = 30</code></strong></p>
+                <p>Based on sampling efficiency. In multi-objective optimization, we are looking for a "plateau" of good solutions, not a single needle in a haystack. 30 samples are often statistically sufficient to find the general direction of the pareto frontier.</p>
+            </div>
+
+            <div class="card">
+                <h3>Is Python slow?</h3>
+                <p>
+                    "Premature optimization is the root of all evil." 
+                    For datasets of this nature (thousands of rows, dozens of columns), standard Python is fast enough (sub-second). 
+                    The bottleneck is usually human understanding, not CPU cycles. We prioritize code readability over raw execution speed.
+                </p>
+            </div>
+        </section>
+
+        <section id="about">
+            <h1>About</h1>
+            <div class="card">
+                <p><strong>Author:</strong> Tim Menzies</p>
+                <p><strong>License:</strong> MIT</p>
+                <p><strong>Year:</strong> 2025</p>
+            </div>
+
+            <h3>Regeneration Prompt</h3>
+            <p>This documentation was generated using the following prompt:</p>
+            <pre style="white-space: pre-wrap; word-wrap: break-word;">
+**Role:** Expert Technical Writer & Frontend Developer.
+**Task:** Create a single-file, responsive HTML documentation for the provided Python script "[FILENAME]".
+
+**1. Structure (The Diataxis Framework + Extras):**
+   - **Overview:** A high-level summary of what the script does and its primary use case.
+   - **Tutorials:** A narrative-driven "Getting Started" guide. Start with installation, then creating dummy data, then running a basic command.
+   - **How-To:** A collection of recipe-based solutions for specific user goals (e.g., debugging, specific flags, interpreting output).
+   - **Reference:** The technical dictionary. 
+     - *CLI:* Document all configuration flags and action commands found by inspecting the argument parsing logic.
+     - *API:* Document core classes, methods, and attributes. **Crucial:** You must list the full function signature with explicit Python type hints (e.g., `def my_func(x: int) -> str`) exactly as they appear in the source code.
+   - **Explanation:** Conceptual background (algorithms, math) and architectural design decisions. **Note:** Use Unicode/HTML for math; do NOT use LaTeX/MathJax.
+   - **About:** Project metadata and credits. **Crucial:** You must include a "Regeneration Prompt" subsection here containing the exact prompt used to generate this file, so the user can recreate it.
+
+**2. Content Constraints (Strict Code Reflection):**
+   - **Source of Truth:** All content must be derived *strictly* from the provided source code.
+   - **Symbol Check:** ONLY document fields and methods actually present in the code.
+     - *Allowed:* Document what exists (e.g., `Num.mu`, `Sym.has`).
+     - *Forbidden:* Do NOT hallucinate standard library features or common methods (like `entropy`, `mode`, `min`, `max`) if they are not explicitly defined in the provided file.
+   - **Idiom Accuracy:** Accurately describe the coding patterns used (e.g., if the code uses `argparse`, document that; if it uses `sys.argv` or docstring reflection, document that specifically).
+
+**3. Visual Style (Modern & Responsive):**
+   - **Theme:** Clean, modern aesthetic (e.g., Slate/Indigo or Gray/Blue palette).
+   - **Architecture:** Use Semantic HTML5 tags (`&lt;nav&gt;`, `&lt;main&gt;`, `&lt;article&gt;`, `&lt;section&gt;`).
+   - **Layout:** Card-based UI with a sidebar (desktop) or top navigation bar (mobile).
+   - **Responsiveness:** Grid/Flexbox layouts must adapt seamlessly to mobile screens.
+   - **Interactivity:**
+     - Tabs must switch content instantly via vanilla JavaScript (no page reloads).
+     - Include a simple **Search/Filter bar** to quickly find content.
+     - Add **"Copy to Clipboard" buttons** to all code blocks.
+   - **Dependencies:** Zero external CSS/JS dependencies (inline everything).
+   - **Theming:** Use CSS Variables (`:root { --primary-color: ... }`) to handle colors and the Dark/Light mode toggle.
+            </pre>
+        </section>
+
+    </div>
+</main>
+
+<script>
+    // TAB LOGIC
+    function switchTab(tabId) {
+        // Hide all sections
+        document.querySelectorAll('section').forEach(el => el.classList.remove('active'));
+        // Deactivate all nav buttons
+        document.querySelectorAll('nav button').forEach(el => el.classList.remove('active'));
+        
+        // Show target
+        document.getElementById(tabId).classList.add('active');
+        document.getElementById('btn-' + tabId).classList.add('active');
+        
+        // Deep linking
+        if(history.pushState) {
+            history.pushState(null, null, '#' + tabId);
+        }
+    }
+
+    // THEME LOGIC
+    function toggleTheme() {
+        const body = document.body;
+        const current = body.getAttribute('data-theme');
+        body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    // SEARCH LOGIC
+    function filterContent() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const activeSection = document.querySelector('section.active');
+        
+        if (!activeSection) return;
+
+        // Search within cards and list items in the active section
+        const targets = activeSection.querySelectorAll('.card, .api-item, tr');
+        
+        targets.forEach(el => {
+            const text = el.innerText.toLowerCase();
+            if (text.includes(query)) {
+                el.style.display = "";
+            } else {
+                // Keep table headers visible
+                if(el.tagName === 'TR' && el.querySelector('th')) return;
+                el.style.display = "none";
+            }
+        });
+    }
+
+    // COPY BUTTON LOGIC
+    document.querySelectorAll('pre').forEach(pre => {
+        const btn = document.createElement('button');
+        btn.className = 'copy-btn';
+        btn.innerText = 'Copy';
+        btn.onclick = () => {
+            const code = pre.querySelector('code');
+            const text = code ? code.innerText : pre.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.innerText = 'Copied!';
+                setTimeout(() => btn.innerText = 'Copy', 2000);
+            });
+        };
+        pre.appendChild(btn);
+    });
+
+    // INIT
+    // Check URL hash on load
+    const hash = window.location.hash.substring(1);
+    if (hash && document.getElementById(hash)) {
+        switchTab(hash);
+    }
+
+    // System theme detection
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.setAttribute('data-theme', 'dark');
+    }
+</script>
+
+</body>
+</html>

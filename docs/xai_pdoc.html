@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>xai API documentation</title>
+<meta name="description" content="xai.py: explainable multi-objective optimzation
+(c) 2025 Tim Menzies, MIT license …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>xai</code></h1>
+</header>
+<section id="section-intro">
+<p>xai.py: explainable multi-objective optimzation <br>
+(c) 2025 Tim Menzies, MIT license
+</p>
+<p>Input is CSV. Header (row 1) defines column roles as follows:
+</p>
+<pre><code>[A-Z]* : Numeric (e.g. "Age").     [a-z]* : Symbolic (e.g. "job").   
+*+     : Mximize (e.g. "Pay+").    *-     : Minimize (e.g. "Cost-").   
+*X     : Ignored (e.g. "idX").     ?      : Missing value (not in header)
+</code></pre>
+<p>For help on command line options:</p>
+<pre><code>./xai.py -h
+</code></pre>
+<p>To install and test, got to <a href="http://tiny.cc/xaipy">http://tiny.cc/xaipy</a> and download file. Then:
+</p>
+<pre><code>chmod +x xai.py   
+mkdir -p $HOME/gits   # download sample data    
+git clone &lt;http://github.com/timm/moot&gt; $HOME/gits/moot   
+./xai.py --tree ~/gits/moot/optimize/misc/auto93.csv
+</code></pre>
+<p>Options:
+</p>
+<pre><code>-h                help   
+-b bins=7         set number of bins for discretization   
+-B Budget=30      set number of rows to evaluate   
+-C Check=5        set number of guesses to check   
+-d data=data.csv  set data to load   
+-l leaf=2         set examples per leaves in a tree   
+-s seed=1         set random number seed
+</code></pre>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="xai.Col"><code class="name flex">
+<span>def <span class="ident">Col</span></span>(<span>at=0, txt=' ')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Col(at=0, txt=&#34; &#34;):
+  col = (Num if txt[0].isupper() else Sym)()
+  col.at, col.txt, col.target = at, txt, 0 if txt[-1]==&#34;-&#34; else 1
+  return col</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.Cols"><code class="name flex">
+<span>def <span class="ident">Cols</span></span>(<span>names)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Cols(names): # (list[str]) -&gt; Cols
+  cols = [Col(n,s) for n,s in enumerate(names)]
+  return obj(it=Cols, names=names, all=cols,
+             x=[col for col in cols if col.txt[-1] not in &#34;+-X&#34;],
+             y=[col for col in cols if col.txt[-1] in &#34;+-&#34;])</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.Cut"><code class="name flex">
+<span>def <span class="ident">Cut</span></span>(<span>at, txt, lo, hi)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Cut(at,txt,lo,hi): 
+  return obj(it=Cut, at=at, txt=txt, xlo=lo, xhi=hi, y=Num())</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.Data"><code class="name flex">
+<span>def <span class="ident">Data</span></span>(<span>rows=None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Data(rows=None):
+  return adds(rows, obj(it=Data, rows=[], n=0, cols=None, _centroid=None))</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.Num"><code class="name flex">
+<span>def <span class="ident">Num</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Num(): return obj(it=Num, n=0, mu=0, m2=0)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.Sym"><code class="name flex">
+<span>def <span class="ident">Sym</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Sym(): return obj(it=Sym, n=0, has={})</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.Tree"><code class="name flex">
+<span>def <span class="ident">Tree</span></span>(<span>n, mu, mids, cut, goals)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def Tree(n, mu, mids, cut, goals):
+  return obj(it=Tree, n=n, mu=mu, mids=mids, cut=cut, kids={}, goals=goals)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.add"><code class="name flex">
+<span>def <span class="ident">add</span></span>(<span>i, v, inc=1)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add(i, v, inc=1):
+  if v!=&#34;?&#34;:
+    if Data is i.it and not i.cols: i.cols = Cols(v) # init, not adding
+    else:
+      i.n += inc # adding
+      if   Sym is i.it: i.has[v] = inc + i.has.get(v,0)
+      elif Num is i.it: 
+        if inc &lt; 0 and i.n &lt; 2:
+          i.mu = i.m2= i.n=0
+        else:
+          d = v-i.mu; i.mu += inc*d/i.n; i.m2 += inc*d*(v-i.mu)
+      else:
+        i._centroid = None # old centroid now out of date
+        [add(col, v[col.at], inc) for col in i.cols.all] # recursive add 
+        (i.rows.append if inc&gt;0 else i.rows.remove)(v)   # row storage
+  return v # convention: always return the thing being added</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.adds"><code class="name flex">
+<span>def <span class="ident">adds</span></span>(<span>src, i=None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def adds(src, i=None): # (src:Iterable, ?i) -&gt; i
+  i = i or Num(); [add(i,v) for v in src or []]; return i</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.clone"><code class="name flex">
+<span>def <span class="ident">clone</span></span>(<span>data, rows=None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def clone(data, rows=None): return adds(rows, Data([data.cols.names]))</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.coerce"><code class="name flex">
+<span>def <span class="ident">coerce</span></span>(<span>s)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def coerce(s):
+  try: return int(s)
+  except Exception as _:
+    try: return float(s)
+    except Exception as _:
+      s = s.strip()
+      return {&#34;true&#34;:True, &#34;false&#34;:False}.get(s,s)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.csv"><code class="name flex">
+<span>def <span class="ident">csv</span></span>(<span>fileName)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def csv(fileName):
+  with open(fileName,encoding=&#34;utf-8&#34;) as f:
+    for l in f:
+      if (l:=l.split(&#34;%&#34;)[0].strip()):
+        yield [coerce(x) for x in l.split(&#34;,&#34;)]</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.cutBest"><code class="name flex">
+<span>def <span class="ident">cutBest</span></span>(<span>data, rows)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cutBest(data, rows):
+  all_bins = (b for col in data.cols.x for b in cutsAll(col, rows, data))
+  return min(all_bins, key=lambda b: cutScore(b), default=None)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.cutScore"><code class="name flex">
+<span>def <span class="ident">cutScore</span></span>(<span>cut)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cutScore(cut): 
+  if cut.y.n&lt;the.leaf: return BIG
+  return cut.y.mu + sd(cut.y) / (sqrt(cut.y.n) + 1/BIG)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.cutSelects"><code class="name flex">
+<span>def <span class="ident">cutSelects</span></span>(<span>cut, row)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cutSelects(cut, row):
+  if (x:=row[cut.at]) == &#34;?&#34; : return True
+  if cut.xlo == cut.xhi      : return x == cut.xhi
+  return cut.xlo &lt;= x &lt; cut.xhi</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.cutShow"><code class="name flex">
+<span>def <span class="ident">cutShow</span></span>(<span>cut, accept=True)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cutShow(cut, accept=True):
+  s,lo,hi = cut.txt, cut.xlo, cut.xhi
+  if lo == hi: 
+    return f&#34;{s} {&#39;==&#39; if accept else &#39;!=&#39;} {lo}&#34;
+  if hi == BIG:
+    return f&#34;{s} {&#39;&gt;=&#39; if accept else &#39;&lt;&#39;} {lo}&#34;
+  if lo == -BIG:
+    return f&#34;{s} {&#39;&lt;&#39; if accept else &#39;&gt;=&#39;} {hi}&#34;
+  return f&#34;{lo} &lt;= {s} &lt; {hi}&#34; if accept else f&#34;{s} &lt; {lo} or {s} &gt;= {hi}&#34;</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.cutsAll"><code class="name flex">
+<span>def <span class="ident">cutsAll</span></span>(<span>col, rows, data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cutsAll(col, rows, data):
+  d, xys = {}, [(r[col.at], disty(data, r)) for r in rows if r[col.at]!=&#34;?&#34;]
+  for x, y in sorted(xys):
+    k = x if Sym is col.it else floor(the.bins * norm(col, x))
+    if k not in d: 
+      d[k] = Cut(col.at,col.txt, x, x)
+    add(d[k].y, y)
+    d[k].xhi = x
+  return cutsComplete(col, sorted(d.values(), key=lambda b: b.xlo))</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.cutsComplete"><code class="name flex">
+<span>def <span class="ident">cutsComplete</span></span>(<span>col, cuts)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def cutsComplete(col, cuts):
+  if Num is col.it:
+    for n, b in enumerate(cuts):
+      b.xlo = cuts[n-1].xhi if n &gt; 0 else -BIG
+      b.xhi = cuts[n+1].xlo if n &lt; len(cuts)-1 else BIG
+  return cuts</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.distx"><code class="name flex">
+<span>def <span class="ident">distx</span></span>(<span>data, row1, row2)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def distx(data,row1,row2):
+  xs = data.cols.x
+  return sqrt(sum(_aha(x, row1[x.at], row2[x.at])**2 for x in xs) / len(xs))</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.disty"><code class="name flex">
+<span>def <span class="ident">disty</span></span>(<span>data, row)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def disty(data,row):
+  ys = data.cols.y
+  return sqrt(sum(abs(norm(y,row[y.at]) - y.target)**2 for y in ys) / len(ys))</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.gauss"><code class="name flex">
+<span>def <span class="ident">gauss</span></span>(<span>mid, div)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def gauss(mid,div):
+  return mid + 2 * div * (sum(random.random() for _ in range(3)) - 1.5)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.go__all"><code class="name flex">
+<span>def <span class="ident">go__all</span></span>(<span>file='data.csv')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__all(file=the.data):
+  &#34;FILE : run all the following&#34; 
+  for k,fun in globals().items():
+    if k.startswith(&#34;go__&#34;) and k != &#34;go__all&#34;:
+      random.seed(the.seed)
+      print(&#34;\n#&#34;,k,&#34;------------&#34;); fun(file)</code></pre>
+</details>
+<div class="desc"><p>FILE : run all the following</p></div>
+</dd>
+<dt id="xai.go__bins"><code class="name flex">
+<span>def <span class="ident">go__bins</span></span>(<span>file='data.csv')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__bins(file=the.data):
+  &#34;FILE : show the rankings of nins&#34;
+  data = Data(csv(file))
+  all_bins = (b for col in data.cols.x for b in cutsAll(col, data.rows, data))
+  for b in sorted(all_bins, key=lambda b: cutScore(b)):
+    print(f&#34;{cutShow(b):20}&#34;, o(mu=b.y.mu, sd=sd(b.y), n=b.y.n, 
+                               scored= cutScore(b)),sep=&#34;\t&#34;)</code></pre>
+</details>
+<div class="desc"><p>FILE : show the rankings of nins</p></div>
+</dd>
+<dt id="xai.go__clone"><code class="name flex">
+<span>def <span class="ident">go__clone</span></span>(<span>file='data.csv')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__clone(file=the.data):
+  &#34;FILE : test echoing structure of a table to a new table&#34;
+  data1 =  Data(csv(file))
+  data2 = clone(data1,data1.rows)
+  assert data1.cols.x[1].mu == data2.cols.x[1].mu</code></pre>
+</details>
+<div class="desc"><p>FILE : test echoing structure of a table to a new table</p></div>
+</dd>
+<dt id="xai.go__csv"><code class="name flex">
+<span>def <span class="ident">go__csv</span></span>(<span>file='data.csv')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__csv(file=the.data):
+  &#34;FILE : test csv loading&#34;
+  total=0
+  for n,row in enumerate(csv(file)):
+    if n &gt; 0: total += len(row)
+    if n &gt; 0: assert isinstance(row[1], (float,int))
+    if n % 40==0: print(row)
+  assert 3184 == total</code></pre>
+</details>
+<div class="desc"><p>FILE : test csv loading</p></div>
+</dd>
+<dt id="xai.go__data"><code class="name flex">
+<span>def <span class="ident">go__data</span></span>(<span>file='data.csv')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__data(file=the.data):
+  &#34;FILE : test ading columns from file&#34;
+  data =  Data(csv(file))
+  total = sum(len(row) for row in data.rows)
+  print(*data.cols.names)
+  assert Num is data.cols.all[0].it
+  assert 3184 == total
+  for col in data.cols.x: print(o(col))</code></pre>
+</details>
+<div class="desc"><p>FILE : test ading columns from file</p></div>
+</dd>
+<dt id="xai.go__distx"><code class="name flex">
+<span>def <span class="ident">go__distx</span></span>(<span>file='data.csv')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__distx(file=the.data):
+  &#34;FILE : show we sort rows by their distance to one row?&#34;
+  data=Data(csv(file))
+  print(*data.cols.names,&#34;distx&#34;,sep=&#34;,&#34;)
+  r1 = data.rows[0]
+  data.rows.sort(key=lambda r2: distx(data,r1,r2))
+  for n,r2 in enumerate(data.rows[1:]):
+    assert 0 &lt;= distx(data, r1,r2) &lt;= 1
+    if n%40==0: print(*r2,o(distx(data,r1,r2)),sep=&#34;,&#34;)</code></pre>
+</details>
+<div class="desc"><p>FILE : show we sort rows by their distance to one row?</p></div>
+</dd>
+<dt id="xai.go__disty"><code class="name flex">
+<span>def <span class="ident">go__disty</span></span>(<span>file='data.csv')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__disty(file=the.data):
+  &#34;FILE : show we sort rows by their distance to heaven?&#34;
+  data=Data(csv(file))
+  print(*data.cols.names,&#34;disty&#34;,sep=&#34;,&#34;)
+  data.rows.sort(key=lambda r: disty(data,r))
+  for n,r1 in enumerate(data.rows):
+    if n&gt;0:
+      r2=data.rows[n-1]
+      assert disty(data, r1) &gt;= disty(data,r2)
+    if n%40==0: print(*r1,o(disty(data, r1)),sep=&#34;,&#34;)</code></pre>
+</details>
+<div class="desc"><p>FILE : show we sort rows by their distance to heaven?</p></div>
+</dd>
+<dt id="xai.go__num"><code class="name flex">
+<span>def <span class="ident">go__num</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__num(_=None):
+  &#34;: test Nums&#34;
+  num = adds(gauss(10, 2) for _ in range(1000))
+  print(o(mu=num.mu, sd=sd(num)))
+  assert 9.9 &lt;= num.mu &lt;=10.1 and 1.9 &lt;= sd(num) &lt;= 2.1</code></pre>
+</details>
+<div class="desc"><p>: test Nums</p></div>
+</dd>
+<dt id="xai.go__sym"><code class="name flex">
+<span>def <span class="ident">go__sym</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__sym(_=None):
+  &#34;: test Syms&#34;
+  sym = adds(&#39;Previously, we have defined an iterative data mining&#39;,Sym())
+  print(sym.has)
+  assert sym.has[&#34;a&#34;]==5</code></pre>
+</details>
+<div class="desc"><p>: test Syms</p></div>
+</dd>
+<dt id="xai.go__tree"><code class="name flex">
+<span>def <span class="ident">go__tree</span></span>(<span>file='data.csv')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__tree(file=the.data): 
+  &#34;FILE : run the optimizer once, show the tree&#34;
+  data    = Data(csv(file)) 
+  lo, mid = go_tree_stats(data) 
+  rows    = shuffle(data.rows) 
+  n       = len(rows) // 2
+  best,tree,uses = trainTest(data,rows[:n][:the.Budget - the.Check],rows[n:])
+  treeShow(tree, width=35)
+  d = disty(data, best)
+  print(o(uses=len(uses), x=len(data.cols.x), y=len(data.cols.y),
+          rows=len(data.rows), ylo=lo, ymid=mid, guess=d, 
+          score=go_tree_score(d, lo, mid)))</code></pre>
+</details>
+<div class="desc"><p>FILE : run the optimizer once, show the tree</p></div>
+</dd>
+<dt id="xai.go__xais"><code class="name flex">
+<span>def <span class="ident">go__xais</span></span>(<span>file='data.csv', repeats=20)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go__xais(file=the.data, repeats=20): 
+  &#34;FILE : run the optimizer 20 times, show stats&#34;
+  data    = Data(csv(file)) 
+  lo, mid = go_tree_stats(data) 
+  wins, guesses = Num(), Num()
+  for _ in range(repeats):
+    rows = shuffle(data.rows) 
+    n    = len(rows) // 2
+    best, _, _ = trainTest(data, rows[:n][:the.Budget - the.Check], rows[n:])
+    d = disty(data, best)
+    add(guesses, d)
+    add(wins, go_tree_score(d, lo, mid))
+  print(o(wins=int(wins.mu), n=guesses.n, lo=lo, mid=mid, guess=o(guesses.mu)),
+         re.sub(r&#34;.*/&#34;,&#34;&#34;,file))</code></pre>
+</details>
+<div class="desc"><p>FILE : run the optimizer 20 times, show stats</p></div>
+</dd>
+<dt id="xai.go_tree_score"><code class="name flex">
+<span>def <span class="ident">go_tree_score</span></span>(<span>d, lo, mid)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go_tree_score(d, lo, mid):
+  return int(100*(1- (d - lo)/ (mid - lo + 1/BIG)))</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.go_tree_stats"><code class="name flex">
+<span>def <span class="ident">go_tree_stats</span></span>(<span>data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def go_tree_stats(data):
+  out = sorted(disty(data, r) for r in data.rows)
+  return out[0], out[len(out)//2] </code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.main"><code class="name flex">
+<span>def <span class="ident">main</span></span>(<span>funs, settings)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def main(funs,settings):
+  for n, s in enumerate(sys.argv):
+    arg = coerce(sys.argv[n + 1]) if n &lt; len(sys.argv) - 1 else None
+    if fn := funs.get(f&#34;go{s.replace(&#39;-&#39;, &#39;_&#39;)}&#34;):
+      fn(arg) if arg is not None else fn()
+    elif s==&#34;-h&#34;:
+      showHelp(funs)
+    else:
+      for k in settings.__dict__:
+        if k[0]== s.lstrip(&#34;-&#34;)[0]: settings.__dict__[k] = arg
+  return settings</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.mid"><code class="name flex">
+<span>def <span class="ident">mid</span></span>(<span>col)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mid(col): return col.mu if Num is col.it else max(col.has,key=col.has.get)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.mids"><code class="name flex">
+<span>def <span class="ident">mids</span></span>(<span>data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def mids(data):
+  data._centroid = data._centroid or [mid(col) for col in data.cols.all]
+  return data._centroid</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.norm"><code class="name flex">
+<span>def <span class="ident">norm</span></span>(<span>num, n)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def norm(num,n):
+  z = (n - num.mu) / sd(num)
+  z = max(-3, min(3, z))
+  return 1 / (1 + exp(-1.7 * z))</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.o"><code class="name flex">
+<span>def <span class="ident">o</span></span>(<span>v=None, DEC=2, **D)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def o(v=None, DEC=2,**D):
+  if D: return o(D,DEC=DEC)
+  isa = isinstance
+  if isa(v, (int, float)): return f&#34;{round(v, DEC):_}&#34;
+  if isa(v, list):  return f&#34;[{&#39;, &#39;.join(o(k,DEC) for k in v)}]&#34;
+  if isa(v, tuple): return f&#34;({&#39;, &#39;.join(o(k,DEC) for k in v)})&#34;
+  if callable(v):   return v.__name__
+  if hasattr(v, &#34;__dict__&#34;): v = vars(v)
+  if isa(v, dict): return &#34;{&#34;+ &#34; &#34;.join(f&#34;:{k} {o(v[k],DEC)}&#34; for k in v) +&#34;}&#34;
+  return str(v)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.sd"><code class="name flex">
+<span>def <span class="ident">sd</span></span>(<span>num)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def sd(num): return 1/BIG + (0 if num.n&lt;2 else sqrt(max(0,num.m2)/(num.n-1)))</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.showHelp"><code class="name flex">
+<span>def <span class="ident">showHelp</span></span>(<span>funs, prefix='go_')</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def showHelp(funs, prefix=&#34;go_&#34;):
+  print(__doc__);
+  for k,f in funs.items():
+    if k.startswith(prefix) and f.__doc__:
+      left, right = f.__doc__.split(&#34;:&#34;)
+      left = k[2:].replace(&#34;_&#34;,&#34;-&#34;) + &#34; &#34; + left.strip()
+      print(f&#34;  {left:15}   {right.strip()}&#34;)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.shuffle"><code class="name flex">
+<span>def <span class="ident">shuffle</span></span>(<span>lst)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def shuffle(lst): random.shuffle(lst); return lst</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.trainTest"><code class="name flex">
+<span>def <span class="ident">trainTest</span></span>(<span>data, train, test)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def trainTest(data, train, test):
+  uses=set()
+  tree = treeGrow(clone(data, train),uses=uses)
+  ranking = sorted(test, key=lambda r: treeLeaf(tree, r).mu)
+  return min(ranking[:the.Check], key=lambda r: disty(data, r)), tree, uses</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.treeGrow"><code class="name flex">
+<span>def <span class="ident">treeGrow</span></span>(<span>data, rows=None, cut=None, uses=set())</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def treeGrow(data, rows=None, cut=None, uses=set()):
+  rows = rows or data.rows
+  centroid=mids(clone(data,rows))
+  tree = Tree(len(rows), 
+              disty(data,centroid),
+              [centroid[col.at] for col in data.cols.y],
+              cut,
+              [col.txt for col in data.cols.y])
+  if len(rows) &gt; the.leaf*2:
+    if cut1 := cutBest(data,rows):
+      ok,no = [],[]
+      for row in rows: (ok if cutSelects(cut1,row) else no).append(row)
+      if ok and no:
+        uses.add(cut1.txt)
+        tree.kids[True]  = treeGrow(data, ok, cut1, uses)
+        tree.kids[False] = treeGrow(data, no, cut1, uses)
+  return tree</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.treeLeaf"><code class="name flex">
+<span>def <span class="ident">treeLeaf</span></span>(<span>tree, row)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def treeLeaf(tree, row):
+  if tree.kids:
+    rule = tree.kids[True].cut 
+    return treeLeaf(tree.kids[cutSelects(rule, row)], row)
+  return tree</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="xai.treeShow"><code class="name flex">
+<span>def <span class="ident">treeShow</span></span>(<span>tree, lvl=0, accept=True, width=60, dec=1)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def treeShow(tree, lvl=0,accept=True,width=60,dec=1):
+  if lvl==0:
+    print(&#34; &#34;)
+    print((&#39; &#39; * width)+f&#34;  score     N   &#34;,&#39;, &#39;.join(tree.goals))
+    print((&#39; &#39; * width)+f&#34;  -----    ---   -------------------&#34;)
+  here = f&#34;{cutShow(tree.cut,accept)} &#34; if lvl&gt;0 else &#34;.&#34;
+  report = f&#34;{&#39;| &#39; * (lvl-1)}{here}&#34;
+  print(f&#34;{report:{width}}: {o(tree.mu):6}: {tree.n:&gt;4} : &#34;,
+        &#39;, &#39;.join([f&#34;{o(n,DEC=dec)}&#34;for n in tree.mids]))
+  for k, kid in tree.kids.items():
+    treeShow(kid, lvl + 1,k,width,dec)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="two-column">
+<li><code><a title="xai.Col" href="#xai.Col">Col</a></code></li>
+<li><code><a title="xai.Cols" href="#xai.Cols">Cols</a></code></li>
+<li><code><a title="xai.Cut" href="#xai.Cut">Cut</a></code></li>
+<li><code><a title="xai.Data" href="#xai.Data">Data</a></code></li>
+<li><code><a title="xai.Num" href="#xai.Num">Num</a></code></li>
+<li><code><a title="xai.Sym" href="#xai.Sym">Sym</a></code></li>
+<li><code><a title="xai.Tree" href="#xai.Tree">Tree</a></code></li>
+<li><code><a title="xai.add" href="#xai.add">add</a></code></li>
+<li><code><a title="xai.adds" href="#xai.adds">adds</a></code></li>
+<li><code><a title="xai.clone" href="#xai.clone">clone</a></code></li>
+<li><code><a title="xai.coerce" href="#xai.coerce">coerce</a></code></li>
+<li><code><a title="xai.csv" href="#xai.csv">csv</a></code></li>
+<li><code><a title="xai.cutBest" href="#xai.cutBest">cutBest</a></code></li>
+<li><code><a title="xai.cutScore" href="#xai.cutScore">cutScore</a></code></li>
+<li><code><a title="xai.cutSelects" href="#xai.cutSelects">cutSelects</a></code></li>
+<li><code><a title="xai.cutShow" href="#xai.cutShow">cutShow</a></code></li>
+<li><code><a title="xai.cutsAll" href="#xai.cutsAll">cutsAll</a></code></li>
+<li><code><a title="xai.cutsComplete" href="#xai.cutsComplete">cutsComplete</a></code></li>
+<li><code><a title="xai.distx" href="#xai.distx">distx</a></code></li>
+<li><code><a title="xai.disty" href="#xai.disty">disty</a></code></li>
+<li><code><a title="xai.gauss" href="#xai.gauss">gauss</a></code></li>
+<li><code><a title="xai.go__all" href="#xai.go__all">go__all</a></code></li>
+<li><code><a title="xai.go__bins" href="#xai.go__bins">go__bins</a></code></li>
+<li><code><a title="xai.go__clone" href="#xai.go__clone">go__clone</a></code></li>
+<li><code><a title="xai.go__csv" href="#xai.go__csv">go__csv</a></code></li>
+<li><code><a title="xai.go__data" href="#xai.go__data">go__data</a></code></li>
+<li><code><a title="xai.go__distx" href="#xai.go__distx">go__distx</a></code></li>
+<li><code><a title="xai.go__disty" href="#xai.go__disty">go__disty</a></code></li>
+<li><code><a title="xai.go__num" href="#xai.go__num">go__num</a></code></li>
+<li><code><a title="xai.go__sym" href="#xai.go__sym">go__sym</a></code></li>
+<li><code><a title="xai.go__tree" href="#xai.go__tree">go__tree</a></code></li>
+<li><code><a title="xai.go__xais" href="#xai.go__xais">go__xais</a></code></li>
+<li><code><a title="xai.go_tree_score" href="#xai.go_tree_score">go_tree_score</a></code></li>
+<li><code><a title="xai.go_tree_stats" href="#xai.go_tree_stats">go_tree_stats</a></code></li>
+<li><code><a title="xai.main" href="#xai.main">main</a></code></li>
+<li><code><a title="xai.mid" href="#xai.mid">mid</a></code></li>
+<li><code><a title="xai.mids" href="#xai.mids">mids</a></code></li>
+<li><code><a title="xai.norm" href="#xai.norm">norm</a></code></li>
+<li><code><a title="xai.o" href="#xai.o">o</a></code></li>
+<li><code><a title="xai.sd" href="#xai.sd">sd</a></code></li>
+<li><code><a title="xai.showHelp" href="#xai.showHelp">showHelp</a></code></li>
+<li><code><a title="xai.shuffle" href="#xai.shuffle">shuffle</a></code></li>
+<li><code><a title="xai.trainTest" href="#xai.trainTest">trainTest</a></code></li>
+<li><code><a title="xai.treeGrow" href="#xai.treeGrow">treeGrow</a></code></li>
+<li><code><a title="xai.treeLeaf" href="#xai.treeLeaf">treeLeaf</a></code></li>
+<li><code><a title="xai.treeShow" href="#xai.treeShow">treeShow</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,117 @@
+.TH XAI.PY 1 "January 2026" "Version 1.0" "User Commands"
+
+.SH NAME
+xai.py \- explainable multi-objective optimization using decision trees
+
+.SH SYNOPSIS
+.B ./xai.py
+[\fIOPTIONS\fR] [\fIACTION\fR] [\fIFILE\fR]
+
+.SH DESCRIPTION
+.B xai.py
+is a lightweight, zero-dependency Python framework for multi-objective optimization. Unlike "black box" AI models, it focuses on interpretability by generating decision trees that isolate the "best" outcomes ("heaven") from the rest.
+
+It uses a recursive partitioning algorithm ("backpacking" code style) to cluster data, maximizing the separation between high-scoring and low-scoring rows based on weighted Euclidean distance to specific goals.
+
+.SH DATA FORMAT
+The input must be a CSV file. The first row (header) defines column roles using casing and suffixes:
+.TP
+.B [A-Z]* (Starts with Uppercase)
+Numeric columns (e.g., "Age", "Weight").
+.TP
+.B [a-z]* (Starts with Lowercase)
+Symbolic/Categorical columns (e.g., "job", "color").
+.TP
+.B name+ (Ends with +)
+A numeric goal to \fBmaximize\fR (e.g., "Salary+").
+.TP
+.B name- (Ends with -)
+A numeric goal to \fBminimize\fR (e.g., "Cost-").
+.TP
+.B nameX (Ends with X)
+A column to \fBignore\fR (e.g., "idX").
+.TP
+.B ?
+Denotes a missing value in the data.
+
+.SH OPTIONS
+Configuration flags control the internal algorithms.
+.TP
+.BI \-b " bins"
+Set the number of bins for discretizing continuous values. Default is \fB7\fR.
+.TP
+.BI \-B " Budget"
+Set the max number of rows to evaluate during optimization. Default is \fB30\fR.
+.TP
+.BI \-C " Check"
+Set the number of guesses to check during stochastic search. Default is \fB5\fR.
+.TP
+.BI \-d " file"
+Set the default data file to load. Default is \fBdata.csv\fR.
+.TP
+.BI \-h
+Print the help message and exit.
+.TP
+.BI \-l " leaf"
+Set the minimum size for leaf nodes. The tree stops growing if a node has fewer than \fI2 * leaf\fR rows. Default is \fB2\fR.
+.TP
+.BI \-s " seed"
+Set the random number generator seed. Default is \fB1\fR.
+
+.SH ACTIONS
+Action flags trigger specific analysis routines.
+.TP
+.B \-\-all
+Run all test suites and examples.
+.TP
+.B \-\-bins
+Show the rankings of bins found in the data.
+.TP
+.B \-\-clone
+Test internal table replication logic.
+.TP
+.B \-\-csv
+Test the CSV loader; prints raw parsed rows.
+.TP
+.B \-\-data
+Test column generation; prints column statistics.
+.TP
+.B \-\-distx
+Sort/print rows by distance to a specific row (independent vars).
+.TP
+.B \-\-disty
+Sort/print rows by distance to "heaven" (dependent goals).
+.TP
+.B \-\-num
+Run unit tests for the \fBNum\fR class.
+.TP
+.B \-\-sym
+Run unit tests for the \fBSym\fR class.
+.TP
+.B \-\-tree
+Run the decision tree optimizer once and display the rule hierarchy.
+.TP
+.B \-\-xais
+Run the optimizer 20 times and display stability statistics.
+
+.SH EXAMPLES
+.B Generate a decision tree for a custom dataset:
+.RS
+  ./xai.py \-\-tree data/auto93.csv
+.RE
+.PP
+.B Run stability analysis with a specific seed:
+.RS
+  ./xai.py \-s 12345 \-\-xais
+.RE
+.PP
+.B Debug data parsing:
+.RS
+  ./xai.py \-\-csv data.csv
+.RE
+
+.SH AUTHOR
+Written by Tim Menzies (2025).
+
+.SH LICENSE
+MIT License.
