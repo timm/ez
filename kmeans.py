@@ -2,7 +2,7 @@
 import sys, random
 from ez import DATA,csv,distx,clone,mids,adds
 
-def kmeans(data, k=8, steps=10, loud=False):
+def kmeans(data, k=14, steps=10, loud=False):
   centroids = random.choices(data.rows, k=k)
   
   for step in range(steps):
