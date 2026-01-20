@@ -14,7 +14,7 @@ clean: ## remove pycadhe
 	rm -rf __pycache__
 
 ghReset:  
-	git remote set-url origin https://timmenzies@github.com/timmenzies/xai.git
+	git remote set-url origin https://timmenzies@github.com/timmenzies/ez.git
 
 lint: $f.py  ## Lint python file x.py using `make lint f=x`    
 	# disable naming, docstring, and formatting rules
@@ -24,7 +24,7 @@ lint: $f.py  ## Lint python file x.py using `make lint f=x`
 					--disable=W0106,W0201,W0311 $f.py
 
 #------------------------
-# xai speicif stuff
+# repo speicif stuff
 Data=~/gits/moot/optimize/misc/auto93.csv
 
 SA    : ok $(Data); ./sa.py 1 $(Data) ## simulated annelling
@@ -71,12 +71,12 @@ col: ## demo of my col
 	@a2ps               \
 		-Br               \
 		--quiet            \
-		--portrait          \
+		--landscape          \
 		--chars-per-line=85  \
 		--line-numbers=1      \
 		--borders=no           \
 		--pro=color             \
-		--columns=2              \
+		--columns=3              \
 		-M letter                 \
 		-o - $< | ps2pdf - $@
 	@open $@

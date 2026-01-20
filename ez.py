@@ -66,11 +66,14 @@ def bucket(col,v):
 def score(num):
   return BIG if num.n < the.leaf else num.mu + sd(num) /(sqrt(num.n) + 1/BIG)
 
-def b2v(num,b): # inverse discretization
-  if b==0: return -BIG. num.lo[b]
-  if b==the.bins-1: return num.lo[b], BIG
-  return num.lo[b], num.lo[b+1]
+def b2v(col,b): # inverse discretization
+  if SYM is col.it: return b
+  if b==0: return -BIG. col.lo[b]
+  if b==the.bins-1: return col.lo[b], BIG
+  return col.lo[b], col.lo[b+1]
 
+#-------------------------------------------------------------------------------
+# distance
 def minkowski(items):
   n,d = 0,0
   for item in items: n, d = n+1, d+item ** the.p
@@ -93,7 +96,7 @@ def aha(col,u,v):
 def nearest(data, row, rows=None):  
   return min(rows or data.rows, key=lambda r: distx(data, row, r))
 
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # tree
 def Tree(data, uses=None):
   uses = uses or set()
