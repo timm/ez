@@ -13,7 +13,7 @@ def sa(data, k=4000, m_rate=0.5, loud=False):
       LO[c.at] + (gauss(v, sd(c)) - LO[c.at]) % (HI[c.at] - LO[c.at] + 1E-32))
 
   def score(row):
-    near = nearest(data,row)
+    near = nearest(data,row, data.rows)
     for y in data.cols.y: row[y.at] = near[y.at]
     return disty(data, row)
 

@@ -18,10 +18,11 @@ ghReset:
 
 lint: $f.py  ## Lint python file x.py using `make lint f=x`    
 	# disable naming, docstring, and formatting rules
+	#ruff check $f.py  --ignore  E401,E701,E702
 	@pylint --disable=C0103,C0104,C0105,C0115,C0116,C0321,C0410 \
-		      --disable=E0213 \
-					--disable=R1735 \
-					--disable=W0106,W0201,W0311 $f.py
+	 	      --disable=E0213 \
+	 				--disable=R1735 \
+	 				--disable=W0106,W0201,W0311 $f.py
 
 #------------------------
 # repo speicif stuff
@@ -30,6 +31,7 @@ Data=~/gits/moot/optimize/misc/auto93.csv
 SA    : ok $(Data); ./sa.py 1 $(Data) ## simulated annelling
 KMEANS: ok $(Data); ./kmeans.py 1 $(Data) ## K-Means
 KDTREE: ok $(Data); ./kdtree.py 1 $(Data) ## KD-Tree
+FASTMAP: ok $(Data); ./fastmap.py 1 $(Data) ## Fastmap
 
 YS: ## show y shorting
 	@./ez.py --ys ~/gits/moot/optimize/misc/auto93.csv  | column -t

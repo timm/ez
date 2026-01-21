@@ -93,8 +93,10 @@ def aha(col,u,v):
   v = v if v != "?" else (0 if u>0.5 else 1)
   return abs(u - v)
 
-def nearest(data, row, rows=None):
-  return min(rows or data.rows, key=lambda r: distx(data, row, r))
+def nearest(*args) : return around(min,*args)
+def furthest(*args): return around(max,*args)
+def around(fn,data,row,rows): 
+  return fn(rows, key=lambda r: distx(data, row, r))
 
 #------------------------------------------------------------------------------
 # tree
@@ -111,7 +113,7 @@ def Tree(data, uses=None):
     return min(d.items(), key=lambda x: score(x[1]), default=None)
 
   def grow(rows):
-    at, b, kids = None, None, {}
+    at, b, kids = None, None, {}   
     if len(rows) > the.leaf*2:
       if cut := bestcut(rows):
         ((at,b), _) = cut
@@ -184,10 +186,10 @@ def coerce(s, BOOL={"true": True, "false": False}):
     except ValueError: return BOOL.get(s, s)
 
 def csv(fileName):
-  with open(fileName, encoding="utf-8") as f:
-    for l in f:
-      if (l := re.sub(r'\s+', '', l.split("#")[0])): # no whitespace, skip comments
-        yield [coerce(x) for x in l.split(",")]
+  with open(fileName, encoding="utf-8") as src:
+    for line in src:
+      if line := re.sub(r'\s+', '', line.split("#")[0]): # no whitespace, skip comments
+        yield [coerce(x) for x in line.split(",")]
 
 #-------------------------------------------------------------------------------
 # cli

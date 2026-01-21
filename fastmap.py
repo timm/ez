@@ -1,6 +1,6 @@
 #!/usr/bin/env python3 -B
 import sys,random
-from ez import DATA,csv,clone,mids,distx,adds,NUM
+from ez import DATA,csv,clone,mids,distx,adds,NUM,furthest
 
 def report(data,groups,loud=False):
   C,stats=[],[]
@@ -17,11 +17,11 @@ def bisect(data,stop=None,loud=False):
   def grow(rows,lvl=0):
     if len(rows)<=stop or lvl>=4:return[rows]
     p=random.choice(rows)
-    l=max(rows,key=lambda r:distx(data,r,p))
-    r=max(rows,key=lambda r:distx(data,r,l))
+    left= furthest(data,p,rows)
+    right= furthest(data,left,rows)
     L,R=[],[]
     for row in rows:
-      d1,d2=distx(data,row,l),distx(data,row,r)
+      d1,d2=distx(data,row,left),distx(data,row,right)
       (L if d1<d2 else R).append(row)
     if not L or not R:return[rows]
     return grow(L,lvl+1)+grow(R,lvl+1)

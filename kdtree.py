@@ -26,5 +26,4 @@ def kdtree(data, stop=None, loud=False):
 if __name__=="__main__":
   seed,file = sys.argv[1:]
   random.seed(seed)
-  print(random.random())
   kdtree(DATA(csv(file)), loud=True)
