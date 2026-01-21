@@ -68,7 +68,7 @@ def score(num):
 
 def b2v(col,b): # inverse discretization
   if SYM is col.it: return b
-  if b==0: return -BIG. col.lo[b]
+  if b==0: return -BIG,  col.lo[b]
   if b==the.bins-1: return col.lo[b], BIG
   return col.lo[b], col.lo[b+1]
 
@@ -80,7 +80,7 @@ def minkowski(items):
   return 0 if n==0 else (d / n) ** (1 / the.p)
 
 def disty(data, row):
-  return minkowski(((norm(y,row[y.at]) - y.goal) for y in data.cols.y))
+  return minkowski((norm(y,row[y.at]) - y.goal) for y in data.cols.y)
 
 def distx(data,row1,row2):
   return minkowski(aha(x, row1[x.at], row2[x.at]) for x in data.cols.x)
@@ -93,7 +93,7 @@ def aha(col,u,v):
   v = v if v != "?" else (0 if u>0.5 else 1)
   return abs(u - v)
 
-def nearest(data, row, rows=None):  
+def nearest(data, row, rows=None):
   return min(rows or data.rows, key=lambda r: distx(data, row, r))
 
 #------------------------------------------------------------------------------
@@ -130,8 +130,8 @@ def Tree(data, uses=None):
 def treeShow1(t, lvl, cut):
   w, g = the.width, [t.x[c.at] for c in t.root.cols.y]
   print(f"{('| '*(lvl-1)+cut):{w}}: {o(t.y.mu):6} : {t.y.n:4} : {o(g)}")
-  [treeShow1(t.kids[k], lvl+1, 
-             f"{t.root.cols.names[t.at]} {'==' if k else '!='} {t.bucket}") 
+  [treeShow1(t.kids[k], lvl+1,
+             f"{t.root.cols.names[t.at]} {'==' if k else '!='} {t.bucket}")
    for k in sorted(t.kids or {}, reverse=True)]
 
 def treeShow(t):
@@ -141,7 +141,7 @@ def treeShow(t):
   treeShow1(t, 0, ".")
   print(f"\n{'':{w}}  Discrete Ranges (b2v):")
   for c in t.root.cols.x:
-    try: print(f"{c.txt:{w}}: {[o(b2v(c,b)) for b in range(the.bins)]}") 
+    try: print(f"{c.txt:{w}}: {[o(b2v(c,b)) for b in range(the.bins)]}")
     except: pass
   print(f"{'bins':{w}}: {[b for b in range(1,the.bins+1)]}")
 
@@ -159,12 +159,12 @@ def o(v):
 class obj(dict):
   __getattr__, __setattr__, __repr__ = dict.__getitem__, dict.__setitem__, o
 
-def gauss(mu,sd):
-  return mu + 2 * sd * (sum(random.random() for _ in range(3)) - 1.5)
+def gauss(mu,sd1):
+  return mu + 2 * sd1 * (sum(random.random() for _ in range(3)) - 1.5)
 
 def pick(d,n):
   n *= random.random()
-  for k,v in d.items(): 
+  for k,v in d.items():
     if (n := n-v) <= 0: break
   return k
 
@@ -177,28 +177,27 @@ def era(items, size=20):
 
 def shuffle(lst): random.shuffle(lst); return lst
 
-def cast(s, FUN=(int, float), BOOL={"true": True, "false": False}):
-  for fn in FUN:
-    try: return fn(s)
-    except ValueError: pass
-  return BOOL.get(s, s)
+def coerce(s, BOOL={"true": True, "false": False}):
+  try: return int(s)
+  except ValueError:
+    try: return float(s)
+    except ValueError: return BOOL.get(s, s)
 
 def csv(fileName):
   with open(fileName, encoding="utf-8") as f:
     for l in f:
-      l = re.sub(r'\s+', '', l.split("#")[0]) # no whitespace, skip comments
-      if l:
-        yield [cast(x) for x in l.split(",")]
+      if (l := re.sub(r'\s+', '', l.split("#")[0])): # no whitespace, skip comments
+        yield [coerce(x) for x in l.split(",")]
 
 #-------------------------------------------------------------------------------
 # cli
 def config(s=__doc__):
-  return obj(**{m[0]:cast(m[1]) for m in re.findall(r"(\w+)=(\S+)", s)})
+  return obj(**{m[0]:coerce(m[1]) for m in re.findall(r"(\w+)=(\S+)", s)})
 
 def cli(funs,d,flags):
   for n, s in enumerate(flags):
-    v = cast(flags[n + 1]) if n < len(flags) - 1 else None
-    if f := funs.get(f"go{s.replace('-', '_')}"): 
+    v = coerce(flags[n + 1]) if n < len(flags) - 1 else None
+    if f := funs.get(f"go{s.replace('-', '_')}"):
       try: f(v)
       except Exception: traceback.print_exc()
     elif (k := s.lstrip("-")[0]) in d: d[k] = v
@@ -221,7 +220,7 @@ def go__ys(f):
   print(*data.cols.names)
   print(o(mids(data)))
   for row in sorted(data.rows, key=lambda r: disty(data, r))[::40]:
-    print(*row,*[bucket(col,row[col.at]) for col in data.cols.y], 
+    print(*row,*[bucket(col,row[col.at]) for col in data.cols.y],
           round(disty(data,row),2))
 
 def go__tree(f):
