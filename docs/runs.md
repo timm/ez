@@ -1,6 +1,73 @@
 jan 22
 
-results with 20 repeats;
+really shoulw relect 60 times
+
+-----
+
+# Knee Point Derivation for $1/\sqrt{n}$ Curve
+
+Given the standard error curve $SE = \sigma/\sqrt{n}$, we find the "knee" — the point of maximum perpendicular distance from the line connecting endpoints.
+
+## Setup
+
+Endpoints: $(x_1, 1/\sqrt{x_1})$ to $(x_2, 1/\sqrt{x_2})$
+
+Normalize to unit square:
+
+$$u = \frac{x - x_1}{x_2 - x_1}, \quad v = \frac{1/\sqrt{x} - 1/\sqrt{x_2}}{1/\sqrt{x_1} - 1/\sqrt{x_2}}$$
+
+The line from $(0,1)$ to $(1,0)$ has equation $u + v = 1$.
+
+## Distance to Line
+
+Perpendicular distance (ignoring constant $\sqrt{2}$):
+
+$$d(x) = 1 - u - v$$
+
+Let $A = x_2 - x_1$ and $B = 1/\sqrt{x_1} - 1/\sqrt{x_2}$
+
+$$d(x) = 1 - \frac{x - x_1}{A} - \frac{1/\sqrt{x} - 1/\sqrt{x_2}}{B}$$
+
+## Maximize
+
+$$\frac{d}{dx}d(x) = -\frac{1}{A} + \frac{1}{2B \cdot x^{3/2}} = 0$$
+
+Solving:
+
+$$x^{3/2} = \frac{A}{2B}$$
+
+$$x_{knee} = \left(\frac{A}{2B}\right)^{2/3}$$
+
+## Simplify
+
+Let $a = \sqrt{x_1}$, $b = \sqrt{x_2}$. Then:
+
+$$A = b^2 - a^2 = (b-a)(b+a)$$
+
+$$B = \frac{1}{a} - \frac{1}{b} = \frac{b-a}{ab}$$
+
+$$\frac{A}{2B} = \frac{(b-a)(b+a)}{2} \cdot \frac{ab}{b-a} = \frac{ab(a+b)}{2}$$
+
+$$\boxed{x_{knee} = \left(\frac{ab(a+b)}{2}\right)^{2/3}}$$
+
+## Example
+
+For $x_1 = 8$, $x_2 = 256$:
+
+- $a = \sqrt{8} = 2\sqrt{2}$
+- $b = \sqrt{256} = 16$
+- $ab = 32\sqrt{2}$
+- $a + b = 2\sqrt{2} + 16$
+
+$$x_{knee} = \left(\frac{32\sqrt{2}(2\sqrt{2} + 16)}{2}\right)^{2/3} = \left(16\sqrt{2}(2\sqrt{2} + 16)\right)^{2/3}$$
+
+$$= \left(64 + 256\sqrt{2}\right)^{2/3} \approx (426.04)^{2/3} \approx 56.6$$
+
+<img width="859" height="554" alt="image" src="https://github.com/user-attachments/assets/e47a01eb-acdd-4ff1-8f94-c08bee381761" />
+
+
+
+# results with 20 repeats;
 
 colum1 is a score that should be maximizes. runs 0..100
 r=#rows,y=#goals,x=#inputs
