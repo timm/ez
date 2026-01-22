@@ -61,7 +61,7 @@ For $x_1 = 8$, $x_2 = 256$:
 
 $$x_{knee} = \left(\frac{32\sqrt{2}(2\sqrt{2} + 16)}{2}\right)^{2/3} = \left(16\sqrt{2}(2\sqrt{2} + 16)\right)^{2/3}$$
 
-$$= \left(64 + 256\sqrt{2}\right)^{2/3} \approx (426.04)^{2/3} \approx 56.6$$
+$$= \left(64 + 256\sqrt{2}\right)^{2/3} \approx (426.04)^{2/3} \approx 60$$
 
 <img width="859" height="554" alt="image" src="https://github.com/user-attachments/assets/e47a01eb-acdd-4ff1-8f94-c08bee381761" />
 
