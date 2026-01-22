@@ -234,8 +234,8 @@ def go__tree(f):
   tree,_ = Tree(data1)
   treeShow(tree)
 
-def go__test(f):
-  data = DATA(csv(f))
+def go__test(filename):
+  data = DATA(csv(filename))
   mid  = len(data.rows)//2
   Y    = lambda r: disty(data,r)
   b4   = sorted(Y(r) for r in data.rows)
@@ -247,7 +247,10 @@ def go__test(f):
     tree,_ = Tree(clone(data,train))
     test.sort(key=lambda r: treeLeaf(tree,r).y.mu)
     add(wins, win(min(test[:the.check], key=Y)))
-  print(o(wins.mu))
+  print(round(wins.mu),
+        *[f"{s}={len(a)}" for s,a in zip(["x","y","r","f"],
+                                         [data.cols.x,data.cols.y,data.rows])],
+        re.sub(".*/","",filename), sep=",")
 
 #------------------------------------------------------------------------------
 the = config()
