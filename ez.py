@@ -239,7 +239,7 @@ def go__test(filename):
   mid  = len(data.rows)//2
   Y    = lambda r: disty(data,r)
   b4   = sorted(Y(r) for r in data.rows)
-  win  = lambda r: int(100 * (1 - (Y(r)  - b4[0]) / (b4[mid] - b4[0])))
+  win  = lambda r: int(100 * (1 - (Y(r)  - b4[0]) / (b4[mid] - b4[0] + 1/BIG)))
   wins = NUM()
   for _ in range(20):
     rows = shuffle(data.rows)
