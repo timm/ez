@@ -47,6 +47,9 @@ def add(i,v):
 
 #-------------------------------------------------------------------------------
 # Query
+def score(num):
+  return BIG if num.n < the.leaf else num.mu + sd(num) /(sqrt(num.n) + 1/BIG)
+
 def mids(data):  return [mid(col) for col in data.cols.all]
 def mid(col):    return mode(col) if SYM is col.it else col.mu
 def mode(sym):   return max(sym.has, key=sym.has.get)
@@ -63,14 +66,10 @@ def bucket(col,v):
   col.lo[b] = min(v, col.lo.get(b,v))
   return b
 
-def score(num):
-  return BIG if num.n < the.leaf else num.mu + sd(num) /(sqrt(num.n) + 1/BIG)
-
-def b2v(col,b): # inverse discretization
-  if SYM is col.it: return b
-  if b==0: return -BIG,  col.lo[b]
-  if b==the.bins-1: return col.lo[b], BIG
-  return col.lo[b], col.lo[b+1]
+def tekcub(col,b):
+  if SYM is col.it: return b,b
+  # Find next smallest key > b for the upper bound, else BIG
+  return col.lo.get(b,-BIG), min((v for k,v in col.lo.items() if k>b),default=BIG)
 
 #-------------------------------------------------------------------------------
 # distance
@@ -93,10 +92,8 @@ def aha(col,u,v):
   v = v if v != "?" else (0 if u>0.5 else 1)
   return abs(u - v)
 
-def nearest(*args) : return around(min,*args)
-def furthest(*args): return around(max,*args)
-def around(fn,data,row,rows): 
-  return fn(rows, key=lambda r: distx(data, row, r))
+def furthest(*args): return nearest(*args,max)
+def nearest(data,row,rows,fn=min): return fn(rows,key=lambda r:distx(data,row,r))
 
 #------------------------------------------------------------------------------
 # tree
@@ -129,23 +126,28 @@ def Tree(data, uses=None):
 
   return grow(data.rows), uses
 
-def treeShow1(t, lvl, cut):
-  w, g = the.width, [t.x[c.at] for c in t.root.cols.y]
-  print(f"{('| '*(lvl-1)+cut):{w}}: {o(t.y.mu):6} : {t.y.n:4} : {o(g)}")
-  [treeShow1(t.kids[k], lvl+1,
-             f"{t.root.cols.names[t.at]} {'==' if k else '!='} {t.bucket}")
-   for k in sorted(t.kids or {}, reverse=True)]
+def treeLeaf(tree, row):
+  if not tree.kids: return tree
+  col = tree.root.cols.all[tree.at]
+  what = bucket(col, row[col.at]) == tree.bucket
+  return treeLeaf(tree.kids[what], row)
 
 def treeShow(t):
-  w = the.width
-  print(f"{'':{w}}  Score    N     {[c.txt for c in t.root.cols.y]}")
-  print(f"{'':{w}}  -----  ----    ---------")
-  treeShow1(t, 0, ".")
-  print(f"\n{'':{w}}  Discrete Ranges (b2v):")
-  for c in t.root.cols.x:
-    try: print(f"{c.txt:{w}}: {[o(b2v(c,b)) for b in range(the.bins)]}")
-    except: pass
-  print(f"{'bins':{w}}: {[b for b in range(1,the.bins+1)]}")
+  def show(n, lvl, pre):
+    g = [n.x[c.at] for c in n.root.cols.y]
+    print(f"{('| '*(lvl-1)+pre):{the.width}}: {o(n.y.mu):6} : {n.y.n:4} : {o(g)}")
+    for k in sorted(n.kids or {}, reverse=True):
+      c, b = n.root.cols.all[n.at], n.bucket
+      if SYM is c.it: s = f"{c.txt} {'==' if k else '!='} {b}"
+      else:
+        lo, hi = tekcub(c, b)
+        if k: s=f"{c.txt}<{o(hi)}" if lo==-BIG else (f"{c.txt}>={o(lo)}"
+                if hi==BIG else f"{o(lo)}<={c.txt}<{o(hi)}")
+        else: s=f"{c.txt}>={o(hi)}" if lo==-BIG else (f"{c.txt}<{o(lo)}"
+                if hi==BIG else f"{c.txt}<{o(lo)} or >={o(hi)}")
+      show(n.kids[k], lvl+1, s)
+  ys = ', '.join([y.txt for y in t.root.cols.y])
+  print(f"{'':{the.width}}   Score      N   [{ys}]"); show(t, 0, "")
 
 #------------------------------------------------------------------------------
 # lib
