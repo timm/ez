@@ -46,9 +46,13 @@ TREE: ## show y shorting
 ~/tmp/ez_test.log:  ## run ezrtest on many files
 	@mkdir -p ~/tmp
 	@$(MAKE) todo=test files="$(HOME)/gits/moot/optimize/*/*.csv" run | tee $@ 
+	@echo; date
+	@python3 -B ez.py --the
+	@sort -n $@  | cut -d, -f 1 | fmt
 
 run:
-	@time ls -r $(files) | xargs -P 24 -n 1 -I{} sh -c 'python3 -B ez.py --$(todo) "{}"'
+	@time ls -r $(files) \
+		| xargs -P 24 -n 1 -I{} sh -c 'python3 -B ez.py --$(todo) "{}"'
 
 #--------------------------
 MY=@bash sh/ell
@@ -81,7 +85,8 @@ col: ## demo of my col
 		-Br               \
 		--quiet            \
 		--landscape          \
-		--chars-per-line=85  \
+    --lines-per-page=80  \
+    --font-size=5 \
 		--line-numbers=1      \
 		--borders=no           \
 		--pro=color             \

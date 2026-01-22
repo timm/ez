@@ -4,12 +4,13 @@ ez.py: easy AI tools
 (c) 2025 Tim Menzies, MIT license
 
 Options:
-   -b bins=7    Number of bins
-   -c check=5   test evalaution budget
+   -b bins=5    Number of bins
+   -B Budget=50 Initial sampling budget 
+   -C Check=5   final evalaution budget
    -l leaf=4    Min examples in leaf of tree
    -p p=2       Distance coeffecient
    -s seed=1    Random number seed
-   -w width=30  Tree display width 
+   -S Show=30   Tree display width 
 """
 from math import log,exp,sqrt
 import re,sys,random,traceback
@@ -136,7 +137,7 @@ def treeLeaf(tree, row):
 def treeShow(t):
   def show(n, lvl, pre):
     g = [n.x[c.at] for c in n.root.cols.y]
-    print(f"{('| '*(lvl-1)+pre):{the.width}}: {o(n.y.mu):6} : {n.y.n:4} : {o(g)}")
+    print(f"{('| '*(lvl-1)+pre):{the.Show}}: {o(n.y.mu):6} : {n.y.n:4} : {o(g)}")
     for k in sorted(n.kids or {}, reverse=True):
       c, b = n.root.cols.all[n.at], n.bucket
       if SYM is c.it: s = f"{c.txt} {'==' if k else '!='} {b}"
@@ -148,7 +149,7 @@ def treeShow(t):
                 if hi==BIG else f"{c.txt}<{o(lo)} or >={o(hi)}")
       show(n.kids[k], lvl+1, s)
   ys = ', '.join([y.txt for y in t.root.cols.y])
-  print(f"{'':{the.width}}   Score      N   [{ys}]"); show(t, 0, "")
+  print(f"{'':{the.Show}}   Score      N   [{ys}]"); show(t, 0, "")
 
 #------------------------------------------------------------------------------
 # lib
@@ -243,12 +244,12 @@ def go__test(filename):
   wins = NUM()
   for _ in range(20):
     rows = shuffle(data.rows)
-    train, test = rows[:mid], rows[mid:]
+    test, train = rows[mid:], rows[:mid][:the.Budget]
     tree,_ = Tree(clone(data,train))
     test.sort(key=lambda r: treeLeaf(tree,r).y.mu)
-    add(wins, win(min(test[:the.check], key=Y)))
+    add(wins, win(min(test[:the.Check], key=Y)))
   print(round(wins.mu),
-        *[f"{s}={len(a)}" for s,a in zip(["x","y","r","f"],
+        *[f"{s}={len(a)}" for s,a in zip(["x","y","r"],
                                          [data.cols.x,data.cols.y,data.rows])],
         re.sub(".*/","",filename), sep=",")
 
