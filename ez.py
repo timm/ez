@@ -5,6 +5,7 @@ ez.py: easy AI tools
 
 Options:
    -b bins=7    Number of bins
+   -c check=5   test evalaution budget
    -l leaf=4    Min examples in leaf of tree
    -p p=2       Distance coeffecient
    -s seed=1    Random number seed
@@ -232,6 +233,21 @@ def go__tree(f):
   data1 = clone(data, shuffle(data.rows)[:50])
   tree,_ = Tree(data1)
   treeShow(tree)
+
+def go__test(f):
+  data = DATA(csv(f))
+  mid  = len(data.rows)//2
+  Y    = lambda r: disty(data,r)
+  b4   = sorted(Y(r) for r in data.rows)
+  win  = lambda r: int(100 * (1 - (Y(r)  - b4[0]) / (b4[mid] - b4[0])))
+  wins = NUM()
+  for _ in range(20):
+    rows = shuffle(data.rows)
+    train, test = rows[:mid], rows[mid:]
+    tree,_ = Tree(clone(data,train))
+    test.sort(key=lambda r: treeLeaf(tree,r).y.mu)
+    add(wins, win(min(test[:the.check], key=Y)))
+  print(o(wins.mu))
 
 #------------------------------------------------------------------------------
 the = config()
