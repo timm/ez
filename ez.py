@@ -242,14 +242,14 @@ def go__test(filename):
   b4   = sorted(Y(r) for r in data.rows)
   win  = lambda r: int(100 * (1 - (Y(r)  - b4[0]) / (b4[mid] - b4[0] + 1/BIG)))
   wins = NUM()
-  for _ in range(20):
+  for _ in range(100):
     rows = shuffle(data.rows)
     test, train = rows[mid:], rows[:mid][:the.Budget]
     tree,_ = Tree(clone(data,train))
     test.sort(key=lambda r: treeLeaf(tree,r).y.mu)
     add(wins, win(min(test[:the.Check], key=Y)))
-  print(round(wins.mu),
-        *[f"{s}={len(a)}" for s,a in zip(["x","y","r"],
+  print(f"{round(wins.mu)}, sd= {round(sd(wins))}",
+        *[f"{s}= {len(a)}" for s,a in zip(["x","y","r"],
                                          [data.cols.x,data.cols.y,data.rows])],
         re.sub(".*/","",filename), sep=",")
 

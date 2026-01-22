@@ -1,5 +1,7 @@
 jan 22
 
+results with 20 repeats;
+
 colum1 is a score that should be maximizes. runs 0..100
 r=#rows,y=#goals,x=#inputs
 
