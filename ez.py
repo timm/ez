@@ -7,7 +7,7 @@ Options:
    -b bins=5    Number of bins
    -B Budget=50 Initial sampling budget 
    -C Check=5   final evalaution budget
-   -l leaf=4    Min examples in leaf of tree
+   -l leaf=2    Min examples in leaf of tree
    -p p=2       Distance coeffecient
    -s seed=1    Random number seed
    -S Show=30   Tree display width 
