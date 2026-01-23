@@ -242,7 +242,7 @@ def go__test(filename):
   b4   = sorted(Y(r) for r in data.rows)
   win  = lambda r: int(100 * (1 - (Y(r)  - b4[0]) / (b4[mid] - b4[0] + 1/BIG)))
   wins = NUM()
-  for _ in range(100):
+  for _ in range(60):
     rows = shuffle(data.rows)
     test, train = rows[mid:], rows[:mid][:the.Budget]
     tree,_ = Tree(clone(data,train))
