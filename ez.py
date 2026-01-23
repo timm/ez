@@ -248,10 +248,10 @@ def go__test(filename):
     tree,_ = Tree(clone(data,train))
     test.sort(key=lambda r: treeLeaf(tree,r).y.mu)
     add(wins, win(min(test[:the.Check], key=Y)))
-  print(f"{round(wins.mu)}, sd= {round(sd(wins))}",
-        *[f"{s}= {len(a)}" for s,a in zip(["x","y","r"],
-                                         [data.cols.x,data.cols.y,data.rows])],
-        re.sub(".*/","",filename), sep=",")
+  print(f"{round(wins.mu)} ,sd {round(sd(wins))} ,b4 {o(b4[mid])} ,lo {o(b4[0])}",
+        *[f"{s} {len(a)}" for s,a in 
+          dict(x=data.cols.x, y=data.cols.y, r=data.rows).items()],
+        *filename.split("/")[-2:], sep=" ,")
 
 #------------------------------------------------------------------------------
 the = config()

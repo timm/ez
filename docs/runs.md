@@ -140,49 +140,41 @@ Thu Jan 22 18:02:04 EST 2026
 96 96 96 97 97 98 98 98 98 99 100 100 100 100 100 100 100
 ```
 
-**Big finding: sd is the strongest predictor** (ρ = -0.58)
+## Predicting Optimization Score from Dataset Metadata
 
-| Predictor | ρ | p |
-|-----------|------|--------|
-| **sd** | -0.58 | <0.001 |
-| **y (goals)** | -0.47 | <0.001 |
-| r (rows) | -0.17 | 0.057 |
-| x (inputs) | -0.14 | 0.12 |
+**Question:** Can optimization score be predicted from x (inputs), y (goals), r (rows), and domain?
 
-R² jumps from **0.21 → 0.36** when you add sd.
+### Summary
 
-**But here's the catch:** sd is an *outcome*, not an *a priori* predictor. You only know sd after running experiments. It tells you "easy datasets have high scores AND low variance" — which is tautological.
+| Model | R² | Notes |
+|-------|-----|-------|
+| x, y, r only | 0.20 | Weak |
+| x, y, r + domain | 0.30 | Modest improvement |
 
-For predicting score *before* running:
-- **y (goals)** is still the only useful signal
-- **x, r** remain useless
+**~70% of variance unexplained** — problem difficulty depends on data structure/landscape, not just shape.
 
-The sd finding does suggest something useful though: **if early runs show high variance, expect lower final scores**. Could be useful for early stopping or adaptive budget allocation.
+### What Helps Prediction
 
-FYI The Health-* datasets are the smoking gun:
+- **y (goals):** r = -0.43. Each additional objective costs ~3-8 points.
+- **Domain:** ~15 point swing between easy (systems, config) and hard (rl, binary_config).
+- **x, r:** Essentially noise (|r| < 0.2).
 
-**Same (x=5, y=3, r=10000), wildly different outcomes:**
-- Health-ClosedPRs0008: score=3, sd=8
-- Health-ClosedPRs0011: score=100, sd=0
+### Score by Domain
 
-What's different? The *landscape*, not the *shape*.
+| Domain | n | Mean | SD | Range |
+|--------|---|------|-----|-------|
+| health_data | 3 | 93 | 6 | 85–100 |
+| systems | 12 | 86 | 10 | 66–99 |
+| config | 35 | 83 | 11 | 56–98 |
+| hpo | 35 | 68 | 28 | 3–100 |
+| process | 10 | 66 | 15 | 40–90 |
+| binary_config | 12 | 57 | 5 | 49–65 |
+| sales_data | 5 | 54 | 32 | 13–92 |
+| rl | 2 | 49 | 5 | 44–54 |
 
-**Likely culprits:**
+### Key Observation
 
-1. **Pareto front geometry** — Is it convex (easy) or concave/disconnected (hard)? Are good solutions clustered or scattered?
+The **hpo** datasets highlight the limit of metadata-based prediction: identical structure (x=5, y=3, r=10k) yields scores from 3 to 100. The optimization landscape — not captured by x/y/r — dominates difficulty.
 
-2. **Objective correlation** — Negatively correlated goals = harder tradeoffs. If goals align, optimization is trivial.
 
-3. **Feature-objective mapping** — Linear? Smooth? Or rugged with local optima?
-
-4. **Noise/variance** in the data itself — Some Health-* repos may just have noisier metrics.
-
-**The sd correlation supports this.** High sd = optimizer struggles to converge = landscape is hard. But you can't know sd until you run experiments.
-
-**Research direction:** Instead of (x,y,r), characterize datasets by:
-- Objective correlation matrix
-- Pareto front sparsity/convexity (sample and measure)
-- Landscape ruggedness (fitness distance correlation)
-
-These would actually predict difficulty. Your current metadata is like predicting marathon times from "number of legs" — necessary but nowhere near sufficient.
 
