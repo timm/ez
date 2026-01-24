@@ -78,19 +78,19 @@ col: ## demo of my col
 	printf "name,age,city\nalice,30,raleigh\nbob,25,boston\ncarol,40,denver\n" \
 		| bash $(GIT_ROOT)/sh/ell col
 
-~/tmp/%.pdf: %.py  ## .py ==> .pdf
+~/tmp/%.pdf: %.py  Makefile ## .py ==> .pdf
 	@mkdir -p ~/tmp
 	@echo "pdf-ing $@ ... "
 	@a2ps               \
 		-Br               \
 		--quiet            \
-		--landscape          \
-    --lines-per-page=80  \
-    --font-size=5 \
+		--portrait          \
+    --lines-per-page=100  \
+		--font-size=6 \
 		--line-numbers=1      \
 		--borders=no           \
 		--pro=color             \
-		--columns=3              \
+		--columns=2              \
 		-M letter                 \
 		-o - $< | ps2pdf - $@
 	@open $@
