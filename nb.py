@@ -74,14 +74,14 @@ the={}
 # --- create --------------------------------------------------------
 def o(t):
   if isinstance(t, dict): t="{"+" ".join(f":{k} {o(t[k])}" for k in t)+"}"
-  if not isinstance(t,float): return str(t) 
-  return f"{int(t)}" if int(t)==t else f"{t:.2f}"
+  if isinstance(t,float): return f"{int(t)}" if int(t)==t else f"{t:.2f}"
+  return str(t) 
 
 class Obj(dict):
   __getattr__,__setattr__,__repr__=dict.__getitem__,dict.__setitem__,o
 
 def Sym(n=0, s=""): return Obj(at=n, txt=s, n=0, has={})
-def Num(n=0, s=""): return Obj(at=n, txt=s, n=0, mu=0, m2=0, sd=0)
+def Num(n=0, s=""): return Obj(at=n, txt=s, n=0, mu=0, m2=0)
 def Col(n=0, s=""): return (Num if s[0].isupper() else Sym)(n,s)
 
 def Data(s="", items=[]):
@@ -90,35 +90,30 @@ def Data(s="", items=[]):
   return d
 
 def Cols(row):
-  all=[Col(n,s)for n,s in enumerate(row)]
+  all=[Col(n,s) for n,s in enumerate(row)]
   return Obj(names=row, all=all,
              x=[c for c in all if not re.search(r"[!X]$", c.txt)],
              y=[c for c in all if re.search(r"!$", c.txt)])
 
-def clone(d, rows=[]): return Data(d.txt, [d.cols.names] + rows)
-
 # --- update --------------------------------------------------------
 def add(i, v):
-  if v != "?":
-    if "rows" in i: # Data
-      if not i.cols: i.cols = Cols(v)
-      else: i.rows.append([add(c, v[c.at]) for c in i.cols.all])
-    else:
-      i.n += 1
-      if "has" in i:  # Sym
-        i.has[v] = 1 + i.has.get(v, 0)
-      else: # Num
-        d = v - i.mu; i.mu += d/i.n; i.m2 += d*(v - i.mu) # welford
-        i.sd = 0 if i.n < 2 else (i.m2/(i.n - 1))**.5
+  if "rows" in i: # Data
+    if not i.cols: i.cols = Cols(v)
+    else: i.rows.append([add(c, v[c.at]) for c in i.cols.all])
+  elif v != "?":
+    i.n += 1
+    if "has" in i:  i.has[v] = 1 + i.has.get(v, 0) # Sym
+    else: d = v - i.mu; i.mu += d/i.n; i.m2 += d*(v - i.mu) # Num
   return v
 
- # --- bayes ---------------------------------------------------------
+# --- bayes ---------------------------------------------------------
 def like(i, v, prior=0):
   if "has" in i:   # Sym
     n = i.has.get(v, 0) + the["k"]*prior
     return max(1/BIG, n/(i.n + the["k"] + 1/BIG))
   else:             # Num
-    var = i.sd**2 + 1/BIG
+    sd = 0 if i.n < 2 else (i.m2/(i.n - 1))**.5
+    var = sd**2 + 1/BIG
     return (1/sqrt(2*math.pi*var)) * exp(-((v - i.mu)**2)/(2*var))
 
 def likes(i, r, nall, nh):
@@ -129,10 +124,11 @@ def likes(i, r, nall, nh):
 def nb(rows):
   all, klasses, nk, out = None, {}, 0, Sym()
   for n, row in enumerate(rows):
-    if not all: all = Data("all", [row])
+    if n==0: all = Data("all", [row])
     else:
       k = row[all.cols.y[0].at]
-      if k not in klasses: nk += 1; klasses[k] = clone(all)
+      if k not in klasses: 
+        nk += 1; klasses[k] = Data(k,[all.cols.names])
       if (n - 1) > the["wait"]: 
         fn = lambda cat:likes(klasses[cat],row,n-1,nk)
         add(out, (max(klasses,key=fn), k)) #(predicted, actual)
@@ -144,9 +140,8 @@ def coerce(s):
   try: return float(s)
   except: return s.strip()
 
-def csv(file):
-  with open(file) as f:
-    for s in f: yield [coerce(x) for x in s.split(",")]
+def csv(f): 
+  return ([coerce(x) for x in s.split(",")] for s in open(f))
 
 # --- main ----------------------------------------------------------
 def eg_h(_):    print(__doc__)
