@@ -25,6 +25,10 @@ lint: $f.py  ## Lint python file x.py using `make lint f=x`
 	 				--disable=W0106,W0201,W0311 $f.py
 
 #------------------------
+Class=~/gits/moot/classify/diabetes.csv
+
+NB: ok $(Class); @./nb.py --nb $(Class)
+
 # repo speicif stuff
 Data=~/gits/moot/optimize/misc/auto93.csv
 

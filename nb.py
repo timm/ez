@@ -61,7 +61,7 @@ API
   likes(i, r, nall, nh)-- Calculate log-likelihood of row r given Data i.
 
   # Utilities
-  coerce(s)           -- Parse string to int, float, or strip whitespace.
+  cast(s)           -- Parse string to int, float, or strip whitespace.
   csv(file)           -- Iterator yielding rows from CSV file.
   o(t)                -- Pretty print object/dict t.
 """
@@ -109,39 +109,38 @@ def add(i, v):
 # --- bayes ---------------------------------------------------------
 def like(i, v, prior=0):
   if "has" in i:   # Sym
-    n = i.has.get(v, 0) + the["k"]*prior
-    return max(1/BIG, n/(i.n + the["k"] + 1/BIG))
+    n = i.has.get(v, 0) + the.k*prior
+    return max(1/BIG, n/(i.n + the.k + 1/BIG))
   else:             # Num
     sd = 0 if i.n < 2 else (i.m2/(i.n - 1))**.5
     var = sd**2 + 1/BIG
     return (1/sqrt(2*math.pi*var)) * exp(-((v - i.mu)**2)/(2*var))
 
 def likes(i, r, nall, nh):
-  b4 = (len(i.rows) + the["m"])/(nall + the["m"]*nh)
+  b4 = (len(i.rows) + the.m)/(nall + the.m*nh)
   return log(b4) + sum(log(like(c, r[c.at], b4)) 
                        for c in i.cols.x if r[c.at] != "?")
 
 def nb(rows):
-  all, klasses, nk, out = None, {}, 0, Sym()
+  all, klasses, nh, out = None, {}, 0, Sym()
   for n, row in enumerate(rows):
     if n==0: all = Data("all", [row])
     else:
       k = row[all.cols.y[0].at]
-      if k not in klasses: 
-        nk += 1; klasses[k] = Data(k,[all.cols.names])
-      if (n - 1) > the["wait"]: 
-        fn = lambda cat:likes(klasses[cat],row,n-1,nk)
+      if k not in klasses: nh +=1; klasses[k]=Data(k,[all.cols.names])
+      if (n - 1) > the.wait: 
+        fn = lambda cat:likes(klasses[cat],row,n-1,nh)
         add(out, (max(klasses,key=fn), k)) #(predicted, actual)
       add(klasses[k], row)
   return out
  
 # --- lib -----------------------------------------------------------
-def coerce(s):
+def cast(s):
   try: return float(s)
   except: return s.strip()
 
 def csv(f): 
-  return ([coerce(x) for x in s.split(",")] for s in open(f))
+  return ([cast(x) for x in s.split(",")] for s in open(f))
 
 # --- main ----------------------------------------------------------
 def eg_h(_):    print(__doc__)
@@ -151,7 +150,7 @@ def eg__num(_): print([add(Num(), x) for x in [10,20,30,40]][-1])
 def eg__csv(f): [print(r) for r in csv(f)]
 def eg__nb(f):  [print(n,*x) for x,n in nb(csv(f)).has.items()] 
 
-for k,v in re.findall(r"(\S+)=(\S+)", __doc__): the[k] = coerce(v)
+the=Obj(**{k:cast(v) for k,v in re.findall(r"(\S+)=(\S+)",__doc__)})
 if __name__ == "__main__":
   for j,s in enumerate(sys.argv):
     if f := vars().get(f"eg{s.replace('-', '_')}"):
