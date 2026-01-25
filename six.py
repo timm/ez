@@ -32,12 +32,12 @@ class Obj(dict):
 
 def Col(n=0, s=" "): return (Num if s[0].isupper() else Sym)(n,s)
 def Sym(n=0, s=" "): return Obj(at=n, txt=s, n=0, has={})
-def Num(n=0, s=" "): return Obj(at=n, txt=s, n=0, mu=0, m2=0,
+def Num(n=0, s=" "): return Obj(at=n, txt=s, n=0, mu=0, m2=0,sd=0,
                                goal= s[-1] != "-")
 
 def Data(s="", items=[]):
   d = Obj(txt=s, rows=[], cols=None)
-  [add(d, r) for r in items]
+  [add(d, row) for row in items]
   return d
 
 def Cols(row):
@@ -47,16 +47,18 @@ def Cols(row):
              y=[c for c in all if re.search(r"[+-]$", c.txt)])
 
 # --- update --------------------------------------------------------
-def add(i, v, w=1):
+def add(i, v, inc=1):
   if "rows" in i: # Data
     if not i.cols: i.cols = Cols(v)
     else: 
-      [add(c, v[c.at], w) for c in i.cols.all]
-      (i.rows.append if w==1 else i.rows.remove)(v)
+      [add(c, v[c.at], inc) for c in i.cols.all]
+      (i.rows.append if inc==1 else i.rows.remove)(v)
   elif v != "?":
-    i.n += w
-    if "has" in i:  i.has[v] = w + i.has.get(v, 0) # Sym
-    else: d = v - i.mu; i.mu += w*d/i.n; i.m2 += w*d*(v - i.mu) # Num
+    i.n += inc
+    if "has" in i:  i.has[v] = inc + i.has.get(v, 0) # Sym
+    else: 
+      d = v - i.mu; i.mu += inc*d/i.n; i.m2 += inc*d*(v - i.mu) # Num
+      i.sd = 0 if i.n < 2 else sqrt(max(i.m2,0)/(i.n - 1))
   return v
 
 def norm(num,v): 
@@ -70,43 +72,49 @@ def disty(data, row):
 def like(i, v, prior=0):
   if "has" in i:   # Sym
     n = i.has.get(v, 0) + the.k*prior
-    return max(1/BIG, n/(i.n + the.k + 1/BIG))
+    tmp = max(1/BIG, n/(i.n + the.k + 1/BIG))
   else:             # Num
-    sd = 0 if i.n < 2 else (i.m2/(i.n - 1))**.5
-    var = sd**2 + 1/BIG
-    return (1/sqrt(2*math.pi*var)) * exp(-((v - i.mu)**2)/(2*var))
+    var = i.sd**2 + 1/BIG
+    tmp = (1/sqrt(2*math.pi*var)) * exp(-((v - i.mu)**2)/(2*var))
+  return max(tmp,1/BIG)
 
 def likes(i, r, nall, nh=2):
   b4 = (len(i.rows) + the.m)/(nall + the.m*nh)
   return log(b4) + sum(log(like(c, r[c.at], b4)) 
                        for c in i.cols.x if r[c.at] != "?")
 
-def y(data):  return lambda row: dist(data,row)
+def y(data):  return lambda row: disty(data,row)
 
-def optimize(rows):
+def peek(rows):
+  rows = list(rows)
+  random.shuffle(rows)
+  best,rest,both = None,None,None
   for n,row in enumerate(rows):
-    if n > the.budget: break
-    if n==0:
-      init = Data("all", [row]); break
-    if n <= the.wait:
-      add(init, row)
-    if n == the.alpha: 
-      tmp  = sorted(init.rows, key=y(init))
-      best = Data("best", [init.cols.names] + tmp[:len(tmp)//2])
-      rest = Data("rest", [init.cols.names] + tmp[len(tmp)//2:])
-    else:
+    if n > the.budget : break
+    if n==0 : both = Data("all", [row]); continue
+    add(both, row)
+    if n == the.alpha : 
+      tmp  = sorted(both.rows, key=y(both))
+      print(tmp)
+      best = Data("best", [both.cols.names] + tmp[:len(tmp)//2])
+      rest = Data("rest", [both.cols.names] + tmp[len(tmp)//2:])
+    elif n > the.alpha:
       pb = likes(best, row, n-1, 2)
       pr = likes(rest, row, n-1, 2)
+      print(pb,pr)
       add(best if pb > pr else rest, row)
       if len(best.rows) > sqrt(n):
         best.rows.sort(key=y(best))
-        add(rest, add(best, best.rows.pop(), -1))
-  return best.rows.sort(key=y(best))[:the.check]
+        add(rest, add(best, best.rows[-1]))
+        print(len(best.rows), len(rest.rows))
+  return sorted(best.rows, key=y(best))[:the.check]
  
 # --- lib -----------------------------------------------------------
 def cast(s):
-  try: return float(s)
-  except: return s.strip()
+  try: return int(s)
+  except Exception: 
+    try: return float(s)
+    except Exception: return s.strip()
 
 def csv(f): 
   return ([cast(x) for x in s.split(",")] for s in open(f))
@@ -122,7 +130,7 @@ def eg__the(_): print(o(the))
 def eg__sym(_): print(add(add(add(Sym(),"a"),"a"),"b"))
 def eg__num(_): print([add(Num(), x) for x in [10,20,30,40]][-1])
 def eg__csv(f): [print(r) for r in csv(f)]
-def eg__nb(f):  [print(n,*x) for x,n in nb(csv(f)).has.items()] 
+def eg__peek(f):[print(*x) for x in peek(csv(f))] 
 
 the=Obj(**{k:cast(v) for k,v in re.findall(r"(\S+)=(\S+)",__doc__)})
 if __name__ == "__main__":
