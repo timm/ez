@@ -40,6 +40,7 @@ CODING STANDARD
   Class System
     Obj(dict):        Base class, provides dot notation access (d.x).
     CamelCase(args):  Factory functions (Sym, Num, Data) returning Obj.
+    camelcase:        "data" (or e.g. "data1") is created by Data()
 
 ----------------------------------------------------------------------
 API
@@ -71,15 +72,28 @@ from math import sqrt, exp, log
 BIG = 1E32
 the={}
 
-# --- create --------------------------------------------------------
+# --- functions ------------------------------------------------------
+def csv(f):
+  with open(f) as file:
+    for s in file: yield [cast(x) for x in s.split(",")]
+
+def cast(s):
+  try: return int(s)
+  except ValueError: 
+    try: return float(s)
+    except ValueError: return s.strip()
+
 def o(t):
-  if isinstance(t, dict): t="{"+" ".join(f":{k} {o(t[k])}" for k in t)+"}"
-  if isinstance(t,float): return f"{int(t)}" if int(t)==t else f"{t:.2f}"
-  return str(t) 
+  match t:
+   case dict(): return "{"+" ".join(f":{k} {o(t[k])}" for k in t)+"}"
+   case float(): return f"{int(t)}" if int(t) == t else f"{t:.2f}"
+   case list()|tuple(): return str([o(x) for x in t])
+   case _: return str(t)
 
 class Obj(dict):
   __getattr__,__setattr__,__repr__=dict.__getitem__,dict.__setitem__,o
 
+# --- objects ------------------------------------------------------
 def Sym(n=0, s=""): return Obj(at=n, txt=s, n=0, has={})
 def Num(n=0, s=""): return Obj(at=n, txt=s, n=0, mu=0, m2=0)
 def Col(n=0, s=""): return (Num if s[0].isupper() else Sym)(n,s)
@@ -90,31 +104,30 @@ def Data(s="", items=[]):
   return d
 
 def Cols(row):
-  all=[Col(n,s) for n,s in enumerate(row)]
+  all = [Col(n,s) for n,s in enumerate(row)]
   return Obj(names=row, all=all,
              x=[c for c in all if not re.search(r"[!X]$", c.txt)],
              y=[c for c in all if re.search(r"!$", c.txt)])
 
-# --- update --------------------------------------------------------
 def add(i, v):
   if "rows" in i: # Data
     if not i.cols: i.cols = Cols(v)
     else: i.rows.append([add(c, v[c.at]) for c in i.cols.all])
   elif v != "?":
     i.n += 1
-    if "has" in i:  i.has[v] = 1 + i.has.get(v, 0) # Sym
-    else: d = v - i.mu; i.mu += d/i.n; i.m2 += d*(v - i.mu) # Num
+    if "mu" in i: d = v - i.mu; i.mu += d/i.n; i.m2 += d*(v - i.mu) 
+    else: i.has[v] = 1 + i.has.get(v, 0) # Sym
   return v
 
 # --- bayes ---------------------------------------------------------
 def like(i, v, prior=0):
-  if "has" in i:   # Sym
-    n = i.has.get(v, 0) + the.k*prior
-    return max(1/BIG, n/(i.n + the.k + 1/BIG))
-  else:             # Num
+  if "mu" in i: # Num
     sd = 0 if i.n < 2 else (i.m2/(i.n - 1))**.5
     var = sd**2 + 1/BIG
     return (1/sqrt(2*math.pi*var)) * exp(-((v - i.mu)**2)/(2*var))
+  else:    # Sym
+    n = i.has.get(v, 0) + the.k*prior
+    return max(1/BIG, n/(i.n + the.k + 1/BIG))
 
 def likes(i, r, nall, nh):
   b4 = (len(i.rows) + the.m)/(nall + the.m*nh)
@@ -130,17 +143,9 @@ def nb(rows):
       if k not in klasses: nh +=1; klasses[k]=Data(k,[all.cols.names])
       if (n - 1) > the.wait: 
         fn = lambda cat:likes(klasses[cat],row,n-1,nh)
-        add(out, (max(klasses,key=fn), k)) #(predicted, actual)
+        add(out, (max(klasses, key=fn), k)) #(predicted, actual)
       add(klasses[k], row)
   return out
- 
-# --- lib -----------------------------------------------------------
-def cast(s):
-  try: return float(s)
-  except: return s.strip()
-
-def csv(f): 
-  return ([cast(x) for x in s.split(",")] for s in open(f))
 
 # --- main ----------------------------------------------------------
 def eg_h(_):    print(__doc__)

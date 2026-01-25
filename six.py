@@ -23,9 +23,11 @@ the={}
 
 # --- create --------------------------------------------------------
 def o(t):
-  if isinstance(t, dict): t="{"+" ".join(f":{k} {o(t[k])}" for k in t)+"}"
-  if isinstance(t,float): return f"{int(t)}" if int(t)==t else f"{t:.2f}"
-  return str(t) 
+  match t:
+   case dict(): return "{"+" ".join(f":{k} {o(t[k])}" for k in t)+"}"
+   case float(): return f"{int(t)}" if int(t) == t else f"{t:.2f}"
+   case list()|tuple(): return str([o(x) for x in t])
+   case _: return str(t)
 
 class Obj(dict):
   __getattr__,__setattr__,__repr__=dict.__getitem__,dict.__setitem__,o
@@ -55,10 +57,10 @@ def add(i, v, inc=1):
       (i.rows.append if inc==1 else i.rows.remove)(v)
   elif v != "?":
     i.n += inc
-    if "has" in i:  i.has[v] = inc + i.has.get(v, 0) # Sym
-    else: 
+    if "mu" in i: 
       d = v - i.mu; i.mu += inc*d/i.n; i.m2 += inc*d*(v - i.mu) # Num
       i.sd = 0 if i.n < 2 else sqrt(max(i.m2,0)/(i.n - 1))
+    else:  i.has[v] = inc + i.has.get(v, 0) # Sym
   return v
 
 def norm(num,v): 
@@ -70,13 +72,13 @@ def disty(data, row):
 
 # --- bayes ---------------------------------------------------------
 def like(i, v, prior=0):
-  if "has" in i:   # Sym
-    n = i.has.get(v, 0) + the.k*prior
-    tmp = max(1/BIG, n/(i.n + the.k + 1/BIG))
-  else:             # Num
+  if "mu" in i:  # Num
     var = i.sd**2 + 1/BIG
     tmp = (1/sqrt(2*math.pi*var)) * exp(-((v - i.mu)**2)/(2*var))
-  return max(tmp,1/BIG)
+    return max(tmp,1/BIG)
+  else:   # Sym
+    n = i.has.get(v, 0) + the.k*prior
+    tmp = max(1/BIG, n/(i.n + the.k + 1/BIG))
 
 def likes(i, r, nall, nh=2):
   b4 = (len(i.rows) + the.m)/(nall + the.m*nh)
@@ -112,12 +114,13 @@ def peek(rows):
 # --- lib -----------------------------------------------------------
 def cast(s):
   try: return int(s)
-  except Exception: 
+  except ValueError: 
     try: return float(s)
-    except Exception: return s.strip()
+    except ValueError: return s.strip()
 
-def csv(f): 
-  return ([cast(x) for x in s.split(",")] for s in open(f))
+def csv(f):
+  with open(f) as file:
+    for s in file: yield [cast(x) for x in s.split(",")]
 
 def minkowski(items):
   n,d = 0,0
