@@ -32,7 +32,8 @@ def o(t):
   match t:
    case dict(): return "{"+" ".join(f":{k} {o(t[k])}" for k in t)+"}"
    case float(): return f"{int(t)}" if int(t) == t else f"{t:.2f}"
-   case list()|tuple(): return str([o(x) for x in t])
+   case tuple(): return "(" + ", ".join(o(x) for x in t) + ")"
+   case list(): return "[" + ", ".join(o(x) for x in t) + "]"
    case _: return str(t)
 
 class Obj(dict):
@@ -69,13 +70,13 @@ def Data(items):
 def clone(data, rows=[]): return Data([data.cols.names] + rows)
 
 # --- Bayes -------------------------------------------------------------------
-def pdf(i,v):
-  v = i.sd**2 + 1/BIG
-  return (1/sqrt(2*pi*v)) * exp(-((v - i.mu)**2)/(2*v))
+def pdf(num,v):
+  v = num.sd**2 + 1/BIG
+  return (1/sqrt(2*pi*v)) * exp(-((v - num.mu)**2)/(2*v))
 
-def like(i, v, prior):
-  if "mu" in i:  return pdf(i,v)
-  else: return (i.has.get(v,0) + the.k*prior) / (i.n + the.k)
+def like(col, v, prior):
+  if "mu" in col:  return pdf(col,v)
+  else: return (col.has.get(v,0) + the.k*prior) / (col.n + the.k)
 
 def loglike(data, row, nall):
   prior = (len(data.rows) + the.m) / (nall + the.m*2)
@@ -106,9 +107,9 @@ def explain(row, best, rest):
     if abs(vote) < 0.1: continue
     if "mu" in cb:
       print(f"{cb.txt:<12} {x:<8.2f} {cb.mu:.2f}±{cb.sd:.2f}"
-            f"   {cr.mu:.2f}±{cr.sd:.2f}   {vote:+.2f}")
+            f"   {o(cr.mu)}±{o(cr.sd)}   {vote:+.2f}")
     else:
-      print(f"{cb.txt:<12} {str(x):<8} {b:.2f}        {r:.2f}        {vote:+.2f}")
+      print(f"{cb.txt:<12} {str(x):<8} {o(b)}        {o(r)}        {vote:+.2f}")
 
 # --- Main --------------------------------------------------------------------
 def main(f):
@@ -131,10 +132,11 @@ def eg__the(_): print(o(the))
 def eg__sym(_): print(add(add(add(Sym(),"a"),"a"),"b"))
 def eg__num(_): print([add(Num(), x) for x in [10,20,30,40]][-1])
 def eg__csv(f): [print(r) for r in csv(f)]
-def eg__opt(f):  [print(n,*x) for x,n in main(csv(f)).has.items()] 
+def eg__opt(f): main(f)
 
 the=Obj(**{k:cast(v) for k,v in re.findall(r"(\S+)=(\S+)",__doc__)})
 if __name__ == "__main__":
   for j,s in enumerate(sys.argv):
-    if f := vars().get(f"eg{s.replace('-', '_')}"):
-      f(sys.argv[j+1] if j+1 < len(sys.argv) else None)
+    v = cast(sys.argv[j+1]) if j+1 < len(sys.argv) else None
+    if f := vars().get(f"eg{s.replace('-', '_')}"): f(v)
+    elif k := s.lstrip("-")[0] in the: the[k] = v
