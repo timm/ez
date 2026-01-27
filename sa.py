@@ -1,24 +1,27 @@
 #!/usr/bin/env python3 -B
 import sys, math, random
-from ez import csv,distx,disty,gauss,sd,pick,NUM,SYM,DATA,nearest, o
+from ez import csv,distx,disty,gauss,sd,pick,NUM,SYM,DATA,nearest, o,clone
 
-def sa(data, k=4000, m_rate=0.5, loud=False):
+def sa(data, k=4000, m_rate=0.5, budget=50, loud=False):
+  random.shuffle(data.rows)
+  some, rows = clone(data,data.rows[:budget]), data.rows[budget:]
   LO, HI = {}, {}
   for c in data.cols.x:
     if c.it == NUM:
-      LO[c.at],*_,HI[c.at] = sorted(r[c.at] for r in data.rows if r[c.at]!="?")
+      LO[c.at],*_,HI[c.at] = sorted(r[c.at] for r in rows if r[c.at]!="?")
 
   def mutate(c, v):
     return pick(c.has,c.n) if c.it==SYM else (
       LO[c.at] + (gauss(v, sd(c)) - LO[c.at]) % (HI[c.at] - LO[c.at] + 1E-32))
 
   def score(row):
-    near = nearest(data,row, data.rows)
+    near = nearest(some,row,some.rows)
     for y in data.cols.y: row[y.at] = near[y.at]
-    return disty(data, row)
+    return disty(some, row)
 
-  s = random.choice(data.rows)[:]
+  s = random.choice(rows)[:]
   e, best = score(s), s[:]
+  if loud: print(f"      {disty(some,s):.2f}", o(s))
 
   for heat in range(k):
     sn = s[:]
@@ -27,7 +30,7 @@ def sa(data, k=4000, m_rate=0.5, loud=False):
 
     if (en:=score(sn)) < e or random.random() < math.exp((e - en)/(1 - heat/k)):
       s, e = sn, en
-      if en < disty(data, best): 
+      if en < disty(some, best): 
         best = s[:]
         if loud: print(f"{heat:<5} {e:.3f}", o(best))
 
