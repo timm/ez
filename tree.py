@@ -26,20 +26,28 @@ def bin(col, x):
 
 def sub(i, v):
   if v != "?" and i.n > 1:
-    i.n -= 1; d = v - i.mu; i.mu -= d/i.n; i.m2 -= d*(v-i.mu)
+    i.n -= 1; d = v - i.mu; i.mu -= d/i.n; i.m2 -= d*(v - i.mu)
   return v
 
-def select(col, row, cut):
+def subNum(grand, part):
+  rest = Num()
+  rest.n = grand.n - part.n
+  rest.mu = (grand.n * grand.mu - part.n * part.mu) / rest.n
+  d = part.mu - rest.mu
+  rest.m2 = grand.m2 - part.m2 - d*d * part.n * rest.n / grand.n
+  return rest
+
+def wants(col, row, cut):
   if (v := row[col.at]) == "?": return v
   return (v <= cut) if "mu" in col else (v == cut)
 
 # --- tree -----------------------------------------------------------
-# bring back num.lo. returnthat lo, not the x value XXX
-def Tree(data, uses=None):
+def Tree(data, uses=None, overall=None):
+  overall = overall or data
   def bestcut(rows):
     yields = ((sc, (x.at, cut))
-              for x in data.cols.x
-              for cut,sc in (numcut if "mu" in x else symcut)(x,rows))
+              for x in overall.cols.x
+              for cut, sc in (numcut if "mu" in x else symcut)(x, rows))
     return min(yields, default=(BIG, None))[1]
 
   def symcut(sym, rows):
@@ -47,22 +55,23 @@ def Tree(data, uses=None):
     for r in rows:
       v, y = r[sym.at], disty(data, r)
       if v != "?":
-        add(grand, y)
-        add(d.get(v) or d.setdefault(v, Num()), y)
-    for v, n in d.items():
-      if n.n >= the.leaf and (grand.n - n.n) >= the.leaf:
-        yield v, (n.n * n.mu + (grand.n * grand.mu - n.n * n.mu)) / grand.n
+        if v not in d: d[v]=Num()
+        add(grand, add(d[v], y))
+    for v, yes in d.items():
+      if yes.n >= the.leaf:
+        no = subNum(grand, yes)
+        if no.n >= the.leaf:
+          yield v, (yes.n * sd(yes) + no.n * sd(no)) / grand.n
 
   def numcut(num, rows):
-    lhs, rhs = Num(), Num()
-    xys = sorted((r[num.at], add(rhs, disty(data, r)), bin(num, r[num.at])) 
+    lhs, rhs, onum = Num(), Num(), overall.cols.all[num.at] 
+    xys = sorted((r[num.at], add(rhs, disty(data, r)), bin(onum, r[num.at])) 
                  for r in rows if r[num.at] != "?")
-    
     for j, (x, y, b) in enumerate(xys):
-      if rhs.n < the.leaf: break # Safety check: stop if rhs is too small
+      if rhs.n < the.leaf: break
       add(lhs, sub(rhs, y)) 
-      if lhs.n >= the.leaf and rhs.n >= the.leaf and b != xys[j+1][2]:
-        yield x, (lhs.n * lhs.mu + rhs.n * rhs.mu) / (lhs.n + rhs.n)
+      if lhs.n >= the.leaf and rhs.n >= the.leaf and b != xys[j-1][2]:
+        yield x, (lhs.n * sd(lhs) + rhs.n * sd(rhs)) / (lhs.n + rhs.n)
 
   def grow(rows):
     at, cut, kids = None, None, {}
@@ -70,11 +79,13 @@ def Tree(data, uses=None):
       if tmp := bestcut(rows):
         at, cut = tmp
         col = data.cols.all[at]
-        ok, no = [], []
-        [(ok if select(col,r,cut) else no).append(r) for r in rows if r[at]!="?"]
-        if ok and no:
+        t, f, q = [], [], []
+        for r in rows:
+          (q if r[at]=="?" else t if wants(col, r, cut) else f).append(r) 
+        max([t, f], key=len).extend(q)
+        if t and f:
           uses.add(at)
-          kids = {True: grow(ok), False: grow(no)}
+          kids = {True: grow(t), False: grow(f)}
     return Obj(root=data, kids=kids, at=at, cut=cut,
                x=mids(clone(data, rows)),
                y=adds(disty(data, row) for row in rows))
@@ -84,12 +95,12 @@ def Tree(data, uses=None):
 
 def treeLeaf(t, row):
   if not t.kids: return t
-  what = select(t.root.cols.all[t.at], row, t.cut)
+  what = wants(t.root.cols.all[t.at], row, t.cut)
   return t if what == "?" else treeLeaf(t.kids[what], row)
 
 def treeShow(t, lvl=0, pre=""):
-  if lvl==0: print(f"{'':{the.Show}}    Score      N   "
-                   f"[{', '.join([y.txt for y in t.root.cols.y])}]")
+  if lvl == 0: print(f"{'':{the.Show}}    Score      N   "
+                     f"[{', '.join([y.txt for y in t.root.cols.y])}]")
   s = f"{('| ' * lvl + pre):{the.Show}}"
   print(f"{s}: {o(t.y.mu):6} : {t.y.n:4} : {o([t.x[c.at] for c in t.root.cols.y])}")
   if t.kids:
@@ -114,7 +125,7 @@ def eg__test(f):
   m = len(d.rows) // 2
   Y = lambda r: disty(d, r)
   b4 = sorted(Y(r) for r in d.rows)
-  win = lambda r: int(100 * (1 - (Y(r)-b4[0]) / (b4[m] - b4[0] + 1/BIG)))
+  win = lambda r: int(100 * (1 - (Y(r) - b4[0]) / (b4[m] - b4[0] + 1/BIG)))
   wins = Num()
   for _ in range(20): 
     rows = shuffle(d.rows)
@@ -133,4 +144,4 @@ if __name__ == "__main__":
       try: f(sys.argv[j + 1] if j + 1 < len(sys.argv) else None)
       except Exception: traceback.print_exc()
     elif (k := s.lstrip("-")[:1]) in the:
-      the[k] = cast(sys.argv[j + 1]) if j+1 < len(sys.argv) else the[k]
+      the[k] = cast(sys.argv[j + 1]) if j + 1 < len(sys.argv) else the[k]

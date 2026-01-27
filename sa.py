@@ -11,8 +11,9 @@ def sa(data, k=4000, m_rate=0.5, budget=50, loud=False):
       LO[c.at], *_, HI[c.at] = sorted(r[c.at] for r in data.rows if r[c.at] != "?")
 
   def mutate(c, v):
-    return pick(c.has, c.n) if "has" in c else (
-      LO[c.at] + (gauss(v, sd(c)) - LO[c.at]) % (HI[c.at] - LO[c.at] + 1E-32))
+    if "mu" in c:
+      return LO[c.at] + (gauss(v,sd(c)) - LO[c.at]) % (HI[c.at] - LO[c.at]+1E-32)
+    return pick(c.has, c.n)
 
   def score(row):
     near = nearest(some,row,some.rows)
