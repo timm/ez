@@ -21,8 +21,16 @@ random.seed(the.seed)
 # --- tree helpers ---------------------------------------------------
 def bin(col, x):
   if x == "?" or "has" in col: return x
-  tmp = (col.hi - col.lo) / (the.bins - 1)
-  return 1 if col.hi == col.lo else int(x / tmp + 0.5) * tmp
+  return int(norm(z(col, x)) * (the.bins - 1) + 0.5)
+
+def bincuts(data):
+  cuts = {}
+  for col in data.cols.x:
+    if "mu" in col:
+      for b, x in ((bin(col, r[col.at]), r[col.at]) 
+                   for r in data.rows if r[col.at] != "?"):
+        cuts[col.at, b] = min(cuts.get((col.at, b), x), x)
+  return cuts
 
 def sub(i, v):
   if v != "?" and i.n > 1:
@@ -39,11 +47,12 @@ def subNum(grand, part):
 
 def wants(col, row, cut):
   if (v := row[col.at]) == "?": return v
-  return (v <= cut) if "mu" in col else (v == cut)
+  return v <= cut if "mu" in col else v == cut
 
 # --- tree -----------------------------------------------------------
 def Tree(data, uses=None, overall=None):
   overall = overall or data
+  cuts = bincuts(overall)  # once, up front
   def bestcut(rows):
     yields = ((sc, (x.at, cut))
               for x in overall.cols.x
@@ -64,14 +73,14 @@ def Tree(data, uses=None, overall=None):
           yield v, (yes.n * sd(yes) + no.n * sd(no)) / grand.n
 
   def numcut(num, rows):
-    lhs, rhs, onum = Num(), Num(), overall.cols.all[num.at] 
+    lhs, rhs, onum = Num(), Num(), overall.cols.all[num.at]
     xys = sorted((r[num.at], add(rhs, disty(data, r)), bin(onum, r[num.at])) 
                  for r in rows if r[num.at] != "?")
     for j, (x, y, b) in enumerate(xys):
       if rhs.n < the.leaf: break
       add(lhs, sub(rhs, y)) 
       if lhs.n >= the.leaf and rhs.n >= the.leaf and b != xys[j-1][2]:
-        yield x, (lhs.n * sd(lhs) + rhs.n * sd(rhs)) / (lhs.n + rhs.n)
+        yield cuts.get((num.at, b), x), (lhs.n * sd(lhs) + rhs.n * sd(rhs)) / (lhs.n + rhs.n)
 
   def grow(rows):
     at, cut, kids = None, None, {}
