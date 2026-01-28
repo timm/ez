@@ -47,7 +47,7 @@ def Tree(data, uses=None, overall=None):
   def bestcut(rows):
     yields = ((sc, (x.at, cut))
               for x in overall.cols.x
-              for cut, sc in (numcut if "mu" in x else symcut)(x, rows))
+              for cut,sc in (numcut if "mu" in x else symcut)(x,rows))
     return min(yields, default=(BIG, None))[1]
 
   def symcut(sym, rows):
