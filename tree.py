@@ -18,7 +18,7 @@ BIG = 1E32
 the = Obj(**{k: cast(v) for k, v in re.findall(r"(\w+)=(\S+)", __doc__)})
 random.seed(the.seed)
 
-# --- tree helpers ---------------------------------------------------
+# --- discretization -------------------------------------------------
 def bin(col, x):
   if x == "?" or "has" in col: return x
   return int(norm(z(col, x)) * (the.bins - 1) + 0.5)
@@ -45,61 +45,64 @@ def subNum(grand, part):
   rest.m2 = grand.m2 - part.m2 - d*d * part.n * rest.n / grand.n
   return rest
 
+def symcut(sym, rows, Y):
+  grand, d = Num(), {}
+  for r in rows:
+    v, y = r[sym.at], Y(r)
+    if v != "?":
+      if v not in d: d[v] = Num()
+      add(grand, add(d[v], y))
+  for v, yes in d.items():
+    if yes.n >= the.leaf:
+      no = subNum(grand, yes)
+      if no.n >= the.leaf:
+        yield v, (yes.n * sd(yes) + no.n * sd(no)) / grand.n
+
+def numcut(num, rows, Y, cuts):
+  lhs, rhs = Num(), Num()
+  xys = sorted((r[num.at], add(rhs, Y(r)), bin(num, r[num.at])) 
+               for r in rows if r[num.at] != "?")
+  for j, (x, y, b) in enumerate(xys):
+    if rhs.n < the.leaf: break
+    add(lhs, sub(rhs, y)) 
+    if lhs.n >= the.leaf and rhs.n >= the.leaf and b != xys[j-1][2]:
+      yield cuts.get((num.at,b),x), \
+            (lhs.n*sd(lhs)+rhs.n * sd(rhs))/(lhs.n+rhs.n)
+
+def bestcut(cols, rows, Y, cuts):
+  yields = ((sc, (col.at, cut))
+            for col in cols
+            for cut, sc in (numcut(col, rows, Y, cuts) if "mu" in col 
+                            else symcut(col, rows, Y)))
+  return min(yields, default=(BIG, None))[1]
+
+# --- tree -----------------------------------------------------------
 def wants(col, row, cut):
   if (v := row[col.at]) == "?": return v
   return v <= cut if "mu" in col else v == cut
 
-# --- tree -----------------------------------------------------------
-def Tree(data, uses=None, overall=None):
-  overall = overall or data
-  cuts = bincuts(overall)  # once, up front
-  def bestcut(rows):
-    yields = ((sc, (x.at, cut))
-              for x in overall.cols.x
-              for cut,sc in (numcut if "mu" in x else symcut)(x,rows))
-    return min(yields, default=(BIG, None))[1]
-
-  def symcut(sym, rows):
-    grand, d = Num(), {}
-    for r in rows:
-      v, y = r[sym.at], disty(data, r)
-      if v != "?":
-        if v not in d: d[v]=Num()
-        add(grand, add(d[v], y))
-    for v, yes in d.items():
-      if yes.n >= the.leaf:
-        no = subNum(grand, yes)
-        if no.n >= the.leaf:
-          yield v, (yes.n * sd(yes) + no.n * sd(no)) / grand.n
-
-  def numcut(num, rows):
-    lhs, rhs, onum = Num(), Num(), overall.cols.all[num.at]
-    xys = sorted((r[num.at], add(rhs, disty(data, r)), bin(onum, r[num.at])) 
-                 for r in rows if r[num.at] != "?")
-    for j, (x, y, b) in enumerate(xys):
-      if rhs.n < the.leaf: break
-      add(lhs, sub(rhs, y)) 
-      if lhs.n >= the.leaf and rhs.n >= the.leaf and b != xys[j-1][2]:
-        yield cuts.get((num.at, b), x), (lhs.n * sd(lhs) + rhs.n * sd(rhs)) / (lhs.n + rhs.n)
-
+def Tree(data, Y=None, overall=None):
   def grow(rows):
     at, cut, kids = None, None, {}
     if len(rows) > the.leaf * 2:
-      if tmp := bestcut(rows):
+      if tmp := bestcut(overall.cols.x, rows, Y, cuts):
         at, cut = tmp
         col = data.cols.all[at]
         t, f, q = [], [], []
         for r in rows:
-          (q if r[at]=="?" else t if wants(col, r, cut) else f).append(r) 
+          (q if r[at] == "?" else t if wants(col, r, cut) else f).append(r)
         max([t, f], key=len).extend(q)
         if t and f:
           uses.add(at)
           kids = {True: grow(t), False: grow(f)}
     return Obj(root=data, kids=kids, at=at, cut=cut,
                x=mids(clone(data, rows)),
-               y=adds(disty(data, row) for row in rows))
+               y=adds(Y(row) for row in rows))
 
-  uses = uses or set()
+  overall = overall or data
+  Y = Y or (lambda r: disty(data, r))
+  cuts = bincuts(overall)
+  uses = set()
   return grow(data.rows), uses
 
 def treeLeaf(t, row):
@@ -126,7 +129,7 @@ def eg_s(n):    the.seed = n; random.seed(n)
 
 def eg__tree(f):
   d = Data(csv(f))
-  tree, _ = Tree(clone(d, shuffle(d.rows)[:50]))
+  tree, _ = Tree(clone(d, shuffle(d.rows)[:50]), overall=d)
   treeShow(tree)
 
 def eg__test(f):
@@ -139,7 +142,7 @@ def eg__test(f):
   for _ in range(20): 
     rows = shuffle(d.rows)
     test, train = rows[m:], rows[:m][:the.Budget]
-    tree, _ = Tree(clone(d, train))
+    tree, _ = Tree(clone(d, train), overall=d)
     test.sort(key=lambda r: treeLeaf(tree, r).y.mu)
     add(wins, win(min(test[:the.Check], key=Y)))
   print(f"{round(wins.mu)} ,sd {round(sd(wins))} ,b4 {o(b4[m])} ,lo {o(b4[0])}",
