@@ -160,3 +160,8 @@ if __name__ == "__main__":
   for j,s in enumerate(sys.argv):
     if f := vars().get(f"eg{s.replace('-', '_')}"):
       f(sys.argv[j+1] if j+1 < len(sys.argv) else None)
+
+# args = iter(sys.argv[1:])
+# for s in args:
+#   if f := globals().get(f"eg_{s.replace('-','_')}"):
+#     f(*[t(next(args)) for t in f.__annotations__.values()])
