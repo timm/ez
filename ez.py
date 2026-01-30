@@ -153,14 +153,13 @@ def treeShow(t):
 
 #------------------------------------------------------------------------------
 # lib
-def o(v):
-  if isinstance(v, float): return round(v, 2)
-  if isinstance(v, (list, tuple, set)): return [o(x) for x in v]
-  if isinstance(v, dict):
-    return "[" + " ".join([f":{k} {o(val)}" for k, val in v.items()]) + "]"
-  if hasattr(v, '__name__'): return v.__name__
-  if hasattr(v, '__dict__'): return f"{type(v).__name__}{o(vars(v))}"
-  return v
+def o(t):
+  match t:
+    case dict(): return "{" + " ".join(f":{k} {o(t[k])}" for k in t) + "}"
+    case float(): return f"{int(t)}" if int(t) == t else f"{t:.2f}"
+    case list(): return "[" + ", ".join(o(x) for x in t) + "]"
+    case tuple(): return "(" + ", ".join(o(x) for x in t) + ")"
+    case _: return str(t)
 
 class obj(dict):
   __getattr__, __setattr__, __repr__ = dict.__getitem__, dict.__setitem__, o
@@ -197,31 +196,32 @@ def csv(fileName):
 
 #-------------------------------------------------------------------------------
 # cli
-def config(s=__doc__):
-  return obj(**{m[0]:coerce(m[1]) for m in re.findall(r"(\w+)=(\S+)", s)})
+def run(f,*args):
+  random.seed(the.seed)
+  try: f(*args)
+  except Exception: traceback.print_exc()
 
-def cli(funs,d,flags):
-  for n, s in enumerate(flags):
-    v = coerce(flags[n + 1]) if n < len(flags) - 1 else None
-    if f := funs.get(f"go{s.replace('-', '_')}"):
-      try: f(v)
-      except Exception: traceback.print_exc()
-    elif (k := s.lstrip("-")[0]) in d: d[k] = v
+def filename(s): return s
 
-def go_h(_)    : print(__doc__)
-def go__the(_) : print(the)
-def go_s(n)    : the.seed=n; random.seed(n)
-def go__csv(f) : [print(row) for row in list(csv(f))[::40]]
+def eg_h():
+  """show help"""
+  print(__doc__)
+  for k, v in globals().items():
+    if k.startswith("eg_"): print(f"  -{k[3:]:<10} {v.__doc__.strip()}")
 
-def go__syms(_):
+def go__the() : print(the)
+def go_s(n:int)    : the.seed=n; random.seed(n)
+def go__csv(f:filename) : [print(row) for row in list(csv(f))[::40]]
+
+def go__syms():
     syms = adds("aaaabbc",SYM()); print(o(x:=ent(syms))); assert abs(1.379-x) < .05
 
-def go__nums(_):
+def go__nums():
   nums = adds(gauss(10, 1) for _ in range(1000))
   print(obj(mu=nums.mu, sd=sd(nums)))
   assert abs(10 - nums.mu) < .05 and abs(1 - sd(nums)) < .05
 
-def go__ys(f):
+def go__ys(f:filename):
   data = DATA(csv(f))
   print(*data.cols.names)
   print(o(mids(data)))
@@ -229,13 +229,13 @@ def go__ys(f):
     print(*row,*[bucket(col,row[col.at]) for col in data.cols.y],
           round(disty(data,row),2))
 
-def go__tree(f):
+def go__tree(f:filename):
   data = DATA(csv(f))
   data1 = clone(data, shuffle(data.rows)[:50])
   tree,_ = Tree(data1)
   treeShow(tree)
 
-def go__test(filename):
+def go__test(f:filename):
   data = DATA(csv(filename))
   mid  = len(data.rows)//2
   Y    = lambda r: disty(data,r)
@@ -254,6 +254,13 @@ def go__test(filename):
         *filename.split("/")[-2:], sep=" ,")
 
 #------------------------------------------------------------------------------
-the = config()
+the= Obj(**{k: cast(v) for k, v in re.findall(r"-(\w+)\s+\w+=(\S+)", __doc__)})
 random.seed(the.seed)
-if __name__=="__main__": cli(vars(),the,sys.argv)
+
+if __name__ == "__main__":
+  args = iter(sys.argv[1:])
+  for s in args:
+    if f := globals().get(f"eg_{s[1:]}"):
+      run(f, *[t(next(args)) for t in f.__annotations__.values()])
+    elif s[1:] in the: 
+      the[s[1:]] = cast(next(args, ""))
