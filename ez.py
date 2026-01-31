@@ -17,11 +17,12 @@ BIG=1e32
 
 #-------------------------------------------------------------------------------
 # Create
-def COL(at=0,txt=" "): return (NUM if txt[0].isupper() else SYM)(at=at,txt=txt)
-def NUM(**d): return OBJ(it=NUM, **d, n=0, mu=0, m2=0, goal=txt[-1]!="-")
+def NUM(**d): return OBJ(it=NUM, **d, n=0, mu=0, m2=0)
 def SYM(**d): return OBJ(it=SYM, **d, n=0, has={})
+def COL(at=0,txt=" "): return (NUM if txt[0].isupper() else SYM)(
+                               at=at, txt=txt, goal=txt[-1]!="-")
 
-def DATA(s="", items=[]):
+def DATA(items=[], s=""):
   return adds(items, OBJ(it=DATA, txt=s, rows=[], cols=None))
 
 def COLS(names):
@@ -38,7 +39,9 @@ def adds(items, it=None):
   it = it or NUM(); [add(it,item) for item in items]; return it
 
 def add(i,v):
-  if DATA is i.it : i.rows += [[add(c,v[c.at]) for c in i.cols.all]]
+  if DATA is i.it : 
+      if not i.cols: i.cols=COLS(v)
+      else: i.rows += [[add(c,v[c.at]) for c in i.cols.all]]
   elif v != "?":
     i.n += 1
     if SYM is i.it : i.has[v] = 1 + i.has.get(v,0)
@@ -97,7 +100,7 @@ def shuffle(lst): random.shuffle(lst); return lst
 def o(t):
   match t:
     case _ if type(t) is type(o): return t.__doc__
-    case dict(): return "{" + " ".join(f":{k} {o(t[k])}" for k in t) + "}"
+    case dict(): return "{"+" ".join(f":{k} {o(t[k])}" for k in t)+"}"
     case float(): return f"{int(t)}" if int(t) == t else f"{t:.2f}"
     case list(): return "[" + ", ".join(o(x) for x in t) + "]"
     case tuple(): return "(" + ", ".join(o(x) for x in t) + ")"
@@ -148,7 +151,7 @@ def eg_s(n:int):
   "Set random number seed."
   the.seed=n; random.seed(n)
 
-def eg__csv(f:filename) : 
+def eg__csvs(f:filename) : 
   "Example: csv reader."
   [print(row) for row in list(csv(f))[::40]]
 
@@ -163,7 +166,7 @@ def eg__nums():
   assert abs(10 - nums.mu) < .05 and abs(1 - sd(nums)) < .05
 
 def eg__ys(f:filename):
-  ""
+  "doc"
   data = DATA(csv(f))
   print(*data.cols.names)
   print(o(mids(data)))
@@ -204,7 +207,7 @@ random.seed(the.seed)
 if __name__ == "__main__":
   args = iter(sys.argv[1:])
   for s in args:
-    if f := globals().get(f"eg_{s[1:]}"):
+    if f := globals().get(f"eg_{s[1:].replace('-','_')}"):
       run(f, *[t(next(args)) for t in f.__annotations__.values()])
     elif s[1:] in the: 
       the[s[1:]] = cast(next(args, ""))
